@@ -4,18 +4,20 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
 /**
  * Created by user on 2016-12-21.
  */
-public class CircleButton extends ImageView {
+public class CircleButton extends RelativeLayout {
 
     static String LOG_TAG = "Jog_Player_CircleTouchEvent";
     int normalBitmapId = R.drawable.ic_circle_release;
@@ -28,25 +30,47 @@ public class CircleButton extends ImageView {
     Context mContext;
     Vibe vibe;
     SeekBar seekBar;
-    private static Bitmap imageOriginal, imageScaled;
-    private static Matrix matrix;
-    private int dialerHeight, dialerWidth;
-
+    int mLayoutWidth, mLayoutHeight, mRotatorWidth, mRotatorHeight;
+    private ImageView ivRotor;
+    private Bitmap bmpRotorOn;
+    int test = 0;
     int accum_Deg, accum_mSec;
 
-    public CircleButton(Context context) {
+    public CircleButton(Context context, int layoutWidth, int layoutHeight) {
         super(context);
         mContext = context;
         vibe = new Vibe(mContext);
+
+        mLayoutWidth = layoutWidth;
+        mLayoutHeight = layoutHeight;
+
+        mRotatorWidth = (layoutWidth > layoutHeight) ? layoutHeight:layoutWidth;
+        mRotatorHeight = (layoutWidth > layoutHeight) ? layoutHeight:layoutWidth;
+
+//        mLayoutWidth = (layoutWidth > layoutHeight) ? layoutHeight:layoutWidth;
+//        mLayoutHeight = (layoutWidth > layoutHeight) ? layoutHeight:layoutWidth;
+
+        int rotoron = R.drawable.center_circle;
+        Bitmap srcon = BitmapFactory.decodeResource(mContext.getResources(), rotoron);
+
+        float scaleWidth = ((float) mRotatorWidth) / srcon.getWidth();
+        float scaleHeight = ((float) mRotatorHeight) / srcon.getHeight();
+        Matrix matrix = new Matrix();
+        matrix.postScale(scaleWidth, scaleHeight);
+
+        bmpRotorOn = Bitmap.createBitmap(
+                srcon, 0, 0,
+                srcon.getWidth(),srcon.getHeight() , matrix , true);
+
+        Log.d(LOG_TAG, "mRotatorWidth " + mRotatorWidth + ", mRotatorHeight " + mRotatorHeight);
+
+        ivRotor = new ImageView(context);
+        ivRotor.setImageBitmap(bmpRotorOn);
+        RelativeLayout.LayoutParams lp_ivKnob = new RelativeLayout.LayoutParams(mRotatorWidth,mRotatorHeight);//LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        lp_ivKnob.addRule(RelativeLayout.CENTER_IN_PARENT);
+        addView(ivRotor, lp_ivKnob);
     }
 
-    public CircleButton(Context context, AttributeSet atts) {
-        super(context, atts);
-        mContext = context;
-        vibe = new Vibe(mContext);
-
-//        setBackgroundResource(normalBitmapId);
-    }
 
     void setMediaPlayerController(MediaPlayerController mediaPlayerController) {
         mMediaPlayerController = mediaPlayerController;
@@ -54,38 +78,15 @@ public class CircleButton extends ImageView {
 
     void init() {
 
-        imageOriginal = BitmapFactory.decodeResource(getResources(), R.drawable.center_circle);
-        matrix = new Matrix();
-
-        dialerHeight = this.getHeight();
-        dialerWidth = this.getWidth();
-
-        Log.d(LOG_TAG, "dialerHeight " + dialerHeight + ", dialerWidth " + dialerWidth + ", imageOriginal.getWidth() " + imageOriginal.getWidth() + ", imageOriginal.getHeight()" + imageOriginal.getHeight() );
-
-        Matrix resize = new Matrix();
-        resize.postScale((float)Math.min(dialerWidth, dialerHeight) / (float)imageOriginal.getWidth(), (float)Math.min(dialerWidth, dialerHeight) / (float)imageOriginal.getHeight());
-        imageScaled = Bitmap.createBitmap(imageOriginal, 0, 0, imageOriginal.getWidth(), imageOriginal.getHeight(), resize, false);
+        //Log.d(LOG_TAG, "dialerHeight " + dialerHeight + ", dialerWidth " + dialerWidth + ", imageOriginal.getWidth() " + imageOriginal.getWidth() + ", imageOriginal.getHeight()" + imageOriginal.getHeight() );
 
         setUnitSec(2);
     }
-
-
 
     void setUnitSec(int sec) {
 
         unit_mSec = (int)((float)((float)sec / 90) * 1000);
         Log.d(LOG_TAG, "setUnitSec sec " + sec + ", unit_mSec " + unit_mSec);
-    }
-
-    double convertAxis(float point, int axis) {
-
-        double modifiedPoint = (double)(point - size/2);
-
-        if(axis == Constants.AXIS_X) {
-            return modifiedPoint;
-        } else {
-            return -modifiedPoint;
-        }
     }
 
     boolean isPlayPauseButton(double x, double y) {
@@ -109,30 +110,35 @@ public class CircleButton extends ImageView {
 
     int degCalc(double x, double y) {
 //        Log.d(LOG_TAG, "calcDeg x : " + x + ", y : " + y);
-        double result_rad = 0;
-        int result_deg = 0;
+        double result_deg = 0;
+        //int result_deg = 0;
 
-        if( (x > 0) && (y > 0) ) {  // 1사분면
-            result_rad = Math.atan2(y,x);
-            result_deg = (int)(result_rad * radToDegree);
-        } else if( (x < 0) && (y > 0) ) {  // 2사분면
-            result_rad = Math.atan2(y,-x);
-            result_deg = (int)(result_rad * radToDegree);
-            result_deg = 180 - result_deg;
-        } else if( (x < 0) && (y < 0) ) {  // 3사분면
-            result_rad = Math.atan2(-y,-x);
-            result_deg = (int)(result_rad * radToDegree);
-            result_deg = 180 + result_deg;
-        } else if ( (x > 0) && (y < 0) ) {  // 4사분면
-            result_rad = Math.atan2(-y,x);
-            result_deg = (int)(result_rad * radToDegree);
-            result_deg = 360 - result_deg;
+ /*   // 수식을 이용한 일반적인 삼각함수 각도 계산방식 - 3시방향 0도, 12시방향 90도, 9시 방향 180도 6시방향 270도
+        if( (x > 0) && (y > 0) ) {  // 1사분면 result_rad = Math.atan2(y,x); result_deg = (int)(result_rad * radToDegree);
+        } else if( (x < 0) && (y > 0) ) {  // 2사분면 result_rad = Math.atan2(y,-x); result_deg = (int)(result_rad * radToDegree); result_deg = 180 - result_deg;
+        } else if( (x < 0) && (y < 0) ) {  // 3사분면 result_rad = Math.atan2(-y,-x); result_deg = (int)(result_rad * radToDegree); result_deg = 180 + result_deg;
+        } else if ( (x > 0) && (y < 0) ) {  // 4사분면 result_rad = Math.atan2(-y,x); result_deg = (int)(result_rad * radToDegree); result_deg = 360 - result_deg;
         }
+*/
 
-//        Log.d(LOG_TAG, "calcDeg x : " + x + ", y : " + y + ", deg " + result_deg);
+        // x : 0 ~ mRotatorWidth(451px), y : 0 ~ mRotatorHeight(451px)  를 0~1 사이의 값으로 변환한다.
+        // Log.d(LOG_TAG, "degCalc x : " + x + ", y : " + y + ", mRotatorWidth " + mRotatorWidth + ", mRotatorHeight " + mRotatorHeight);
+        x = x / ((double) mRotatorWidth);
+        y = y / ((double) mRotatorHeight);
+
+        // 아래에서 0~1 사이의 값을 사용하던 좌표계를 -0.5~ + 0.5 를 사용하는 좌표계로 변환하기 위해 completely 대칭을 만들어 주기 위해 아래와 같이 대칭 처리를 해준다.
+        x = 1 - x;
+        y = 1 - y;
+
+        result_deg = (double) -Math.toDegrees(Math.atan2(x - 0.5f, y - 0.5f));
+        // Log.d(LOG_TAG, "result_deg : " + result_deg + ", x " + x + ", y " + y);
+        if( result_deg < 0 ) {
+            result_deg = 360 + result_deg;
+        }
+//        Log.d(LOG_TAG, "calcDeg x : " + x + ", y : " + y + ", deg " + (int)result_deg);
 //        Log.d(LOG_TAG, "calcDeg deg " + result_deg);
 
-        return result_deg;
+        return (int)result_deg;
     }
 
     @Override
@@ -212,13 +218,12 @@ public class CircleButton extends ImageView {
                 case MotionEvent.ACTION_MOVE:
                     //if( jog_drag_state == Constants.JOG_DRAG_START) {
                     if(true) { // just for debug
-                        x = convertAxis(event.getX(), Constants.AXIS_X);
-                        y = convertAxis(event.getY(), Constants.AXIS_Y);
 
-                        new_deg = degCalc(x, y);
+                        //new_deg = degCalc(x, y);
+                        new_deg = degCalc(event.getX(), event.getY());
                         int shiftTime = getShifTime(old_deg, new_deg);
 
-                        vibe.vibration(80);
+                        //vibe.vibration(80);
 
                         accum_Deg += (new_deg - old_deg);
                         accum_mSec += shiftTime;
@@ -231,13 +236,14 @@ public class CircleButton extends ImageView {
                             Log.d(LOG_TAG, "MotionEvent.ACTION_MOVE same degree old_deg " + old_deg + ", new_deg " + new_deg);
                         }
                         old_deg = new_deg;
-
-                        matrix.postRotate(new_deg);
-                        setImageBitmap(Bitmap.createBitmap(imageScaled, 0, 0, imageScaled.getWidth(), imageScaled.getHeight(), matrix, true));
+                        Log.d(LOG_TAG, "MotionEvent.ACTION_MOVE new_deg " + new_deg );
+                        Matrix matrix=new Matrix();
+                        ivRotor.setScaleType(ImageView.ScaleType.MATRIX);
+                        matrix.postRotate((float) new_deg, mRotatorWidth/2, mRotatorHeight/2);//getWidth()/2, getHeight()/2);
+                        ivRotor.setImageMatrix(matrix);
                     }
                     break;
             }
-            //invalidate();
             return true;
             }
 

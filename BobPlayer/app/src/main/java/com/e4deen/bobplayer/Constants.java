@@ -32,4 +32,5 @@ public class Constants {
     static int BOOKMARK_B = 1;
     static int PROGRESS_BAR_TIME = 2;
 
+    static int SEC = 1000;
 }
