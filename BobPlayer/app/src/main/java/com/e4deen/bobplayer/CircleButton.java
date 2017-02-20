@@ -69,6 +69,8 @@ public class CircleButton extends RelativeLayout {
         RelativeLayout.LayoutParams lp_ivKnob = new RelativeLayout.LayoutParams(mRotatorWidth,mRotatorHeight);//LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         lp_ivKnob.addRule(RelativeLayout.CENTER_IN_PARENT);
         addView(ivRotor, lp_ivKnob);
+
+        setUnitSec(4);
     }
 
 
@@ -80,13 +82,16 @@ public class CircleButton extends RelativeLayout {
 
         //Log.d(LOG_TAG, "dialerHeight " + dialerHeight + ", dialerWidth " + dialerWidth + ", imageOriginal.getWidth() " + imageOriginal.getWidth() + ", imageOriginal.getHeight()" + imageOriginal.getHeight() );
 
-        setUnitSec(2);
+        setUnitSec(4);
     }
 
     void setUnitSec(int sec) {
+//        unit_mSec = (int)((float)((float)sec / 90) * 1000);
+//        Log.d(LOG_TAG, "setUnitSec sec " + sec + ", unit_mSec " + unit_mSec);
 
-        unit_mSec = (int)((float)((float)sec / 90) * 1000);
-        Log.d(LOG_TAG, "setUnitSec sec " + sec + ", unit_mSec " + unit_mSec);
+        unit_mSec = (int)( ( ((float)1/(float)360) * (float)1000) * sec )  ;
+        //Log.d(LOG_TAG, "setUnitSec (float)(1/360) " + ( (float) 1/ (float)360 ) + ", test " + ( (float) 1/ (float)360 ) * (float)1000);
+        //Log.d(LOG_TAG, "setUnitSec sec " + sec + ", unit_mSec " + unit_mSec);
     }
 
     boolean isPlayPauseButton(double x, double y) {
@@ -227,13 +232,16 @@ public class CircleButton extends RelativeLayout {
 
                         accum_Deg += (new_deg - old_deg);
                         accum_mSec += shiftTime;
-//                        Log.d(LOG_TAG, "MotionEvent.ACTION_MOVE accum_Deg " + accum_Deg + ", accum_mSec " + accum_mSec);
-                        if(shiftTime < 0) {
-                            //mMediaPlayerController.rewPlay( -shiftTime );
-                        } else if ( shiftTime >= 0) {
-                            //mMediaPlayerController.ffPlay( shiftTime );
-                        } else {
-                            Log.d(LOG_TAG, "MotionEvent.ACTION_MOVE same degree old_deg " + old_deg + ", new_deg " + new_deg);
+                        Log.d(LOG_TAG, "MotionEvent.ACTION_MOVE accum_Deg " + accum_Deg + ", accum_mSec " + accum_mSec);
+                        if(Constants.FILE_READY_STATUS == Constants.FILE_READY) {
+                            if (shiftTime < 0) {
+                                shiftTime = -shiftTime;
+                                mMediaPlayerController.rewPlay(shiftTime);
+                            } else if (shiftTime >= 0) {
+                                mMediaPlayerController.ffPlay(shiftTime);
+                            } else {
+                                Log.d(LOG_TAG, "MotionEvent.ACTION_MOVE same degree old_deg " + old_deg + ", new_deg " + new_deg);
+                            }
                         }
                         old_deg = new_deg;
                         Log.d(LOG_TAG, "MotionEvent.ACTION_MOVE new_deg " + new_deg );
@@ -250,19 +258,22 @@ public class CircleButton extends RelativeLayout {
 
     int getShifTime(int old_deg, int new_deg) {
         int shift_mSec = 0;
-        if( old_deg > new_deg) { // 일반적으로 위에서 아래로 내려오는 드래그 : FF Play , FF 는 양수를 리턴
-            if( (old_deg - new_deg) > 300) {  // 예외상황. 359도 에서 1도로 드래그한 케이스. 역방이기때문에 따로 처리 필요함.
-                shift_mSec = -( ( 360 - old_deg ) + new_deg ) ;
+        Log.d(LOG_TAG, "getShiftTime old_deg " + old_deg + ", new_deg " + new_deg);
+        if( old_deg > new_deg) { // 반시계방향으로 회전하는 경우. Rew
+            if( (old_deg - new_deg) > 300) {  // 1도에서 359도로 드래그한 케이스.
+                shift_mSec = (360 - old_deg) + new_deg ;
             } else {
-                shift_mSec = old_deg - new_deg;
+                shift_mSec = -(old_deg - new_deg);
             }
-        } else if ( new_deg > old_deg ) { // 일반적으로 아래에서 위로 올리는 드래그 : Rew Play, Rew 는 음수를 리턴
-            if( (new_deg - old_deg) > 300 ) { // 1도에서 359로 드래그한 케이스. 역방향이기 때문에 별도 처리 필요함.
-                shift_mSec = old_deg + (360 - new_deg);
+        } else if ( new_deg > old_deg ) { // 시계방향으로 회전하는 경우. FF
+            if( (new_deg - old_deg) > 300 ) { // 359도에서 1로 드래그한 케이스. 별도 처리 필요함.
+                shift_mSec = -((360 - new_deg) + old_deg);
             } else {
-                shift_mSec = -( new_deg - old_deg );
+                shift_mSec = new_deg - old_deg;
             }
         }
-        return shift_mSec = shift_mSec * unit_mSec; // 위에서는 차이나는 각도를 계산한것이고 여기서 단위시간과 곱해서 리턴
+        shift_mSec = shift_mSec * unit_mSec;
+        Log.d(LOG_TAG, "getShiftTime shift_mSec " + shift_mSec + ", old_deg " + old_deg + ", new_deg " + new_deg + ", unit_mSec " + unit_mSec);
+        return shift_mSec; // 위에서는 차이나는 각도를 계산한것이고 여기서 단위시간과 곱해서 리턴
     }
 }

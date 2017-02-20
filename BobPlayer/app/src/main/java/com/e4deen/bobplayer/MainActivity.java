@@ -190,10 +190,12 @@ public class MainActivity extends AppCompatActivity {
 
         Log.d(LOG_TAG, "onCreateOptionsMenu  RL_Circle.getWidth() " + RL_Circle.getWidth() + ", RL_Circle.getHeight() " + RL_Circle.getHeight());
         CircleButton btn_Circle = new CircleButton(this, RL_Circle.getWidth(), RL_Circle.getHeight() );
+        btn_Circle.setMediaPlayerController(mMediaPlayerController);
         RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
         //lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
         lp.addRule(RelativeLayout.CENTER_IN_PARENT);
         RL_Circle.addView(btn_Circle, lp);
+
 //        RL_Circle.addView(btn_TestCircle, lp);
 
 //----------center bar -----------------------------------

@@ -172,6 +172,7 @@ public class MediaPlayerController {
 
     public int setPlayFile(String fullPath)  {
         playFile = fullPath;
+        Log.d(LOG_TAG, "setPlayFile fullPath = " + playFile);
         sendMessage(COMMAND_SET_FILE, playFile);
         return E_SUCCESS;
     }
