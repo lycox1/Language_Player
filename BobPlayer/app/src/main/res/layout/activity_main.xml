@@ -58,7 +58,7 @@
                     android:id="@+id/rl_seekbar">
 
                     <TextView
-                        android:text="01:15"
+                        android:text="00:00"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/tv_elapsed_time"
@@ -74,7 +74,7 @@
                         android:layout_alignBaseline="@+id/tv_total_duration"/>
 
                     <TextView
-                        android:text="03:25"
+                        android:text="00:00"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/tv_total_duration"

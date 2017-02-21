@@ -42,7 +42,10 @@ import com.e4deen.bobplayer.listview.PlayList_Adapter;
 import com.e4deen.bobplayer.datatype.BookMark;
 import org.w3c.dom.Text;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Main Activity. Inflates main activity xml and child fragments.
@@ -71,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
     TextView tv_total_duration, tv_elapsed_time, tv_play_speed;
     EditText et_rew_ff_time;
     ArrayList<BookMark> bookmarkList = new ArrayList<BookMark>();
+    float mDensity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,6 +135,7 @@ public class MainActivity extends AppCompatActivity {
 
         getPermission();
 
+        mDensity = getResources().getDisplayMetrics().density;
 //----------------------------- ETC Start --------------------------------------//
     }
 
@@ -273,7 +278,6 @@ public class MainActivity extends AppCompatActivity {
         }
         super.onDestroy();
     }
-
 
     View.OnTouchListener mTouchEvent = new View.OnTouchListener() {
         @Override
@@ -478,7 +482,7 @@ public class MainActivity extends AppCompatActivity {
                     switch (action) {
                         case MotionEvent.ACTION_DOWN:
                             btn_bookmark_rew.setImageResource(R.drawable.ic_common_press);
-                            //rewBookmark();
+                            rewBookmark();
                             break;
                         case MotionEvent.ACTION_UP:
                             btn_bookmark_rew.setImageResource(R.drawable.ic_bookmark_rew_release);
@@ -489,7 +493,7 @@ public class MainActivity extends AppCompatActivity {
                     switch (action) {
                         case MotionEvent.ACTION_DOWN:
                             btn_bookmark_ff.setImageResource(R.drawable.ic_common_press);
-                            //ffBookmark();
+                            ffBookmark();
                             break;
                         case MotionEvent.ACTION_UP:
                             btn_bookmark_ff.setImageResource(R.drawable.ic_bookmark_ff_release);
@@ -502,6 +506,76 @@ public class MainActivity extends AppCompatActivity {
 
     };
 
+    public void rewBookmark() {
+/*
+        if(repeatEnable == true) {
+            Log.d(LOG_TAG, "rewBookmark() repeatEnable is true. rewBookmark() cant't work");
+            return;
+        }
+*/
+        int current_progress, compareIndex, rew_progress;
+        current_progress= seekBar.getProgress();
+
+        synchronized (bookmarkList) {
+            if(bookmarkList.size() <= 0) {
+                Log.e(LOG_TAG, "rewBookmark bookmarkList.size() is 0");
+                return;
+            }
+
+            for (compareIndex = bookmarkList.size() - 1; compareIndex >= 0; compareIndex--) {
+                Integer compareProgress = bookmarkList.get(compareIndex).progress;
+
+                if (0 > compareProgress.compareTo(current_progress - 500)) {  // compareProgress 가 current_progress 보다 작으면 음수
+                    Log.d(LOG_TAG, "rewBookmark before add a index " + compareIndex + 2 + ", bookmark_progress : " + current_progress);
+                    rew_progress = bookmarkList.get(compareIndex).progress;
+                    mMediaPlayerController.seekTo(rew_progress);
+                    break;
+                }
+            }
+        }
+        return;
+    }
+
+    public void ffBookmark() {
+/*
+        if(repeatEnable == true) {
+            Log.d(LOG_TAG, "ffBookmark() repeatEnable is true. ffBookmark() cant't work");
+            return;
+        }
+  */
+        int current_progress, compareIndex, ff_progress;
+        current_progress = seekBar.getProgress();
+
+        synchronized (bookmarkList) {
+            if(bookmarkList.size() <= 0) {
+                Log.e(LOG_TAG, "ffBookmark bookmarkList.size() is 0");
+                return;
+            }
+
+            for (compareIndex = (bookmarkList.size() - 1); compareIndex >= 0; compareIndex--) {
+                Integer compareProgress = bookmarkList.get(compareIndex).progress;
+
+                if (0 > compareProgress.compareTo(current_progress)) {
+                    Log.d(LOG_TAG, "ffBookmark index " + compareIndex + ", compareProgress " + compareProgress + ", current_progress : " + current_progress);
+                    if( bookmarkList.size() > compareIndex + 1) {
+                        ff_progress = bookmarkList.get(compareIndex + 1).progress;
+                        mMediaPlayerController.seekTo(ff_progress);
+                        seekBar.setProgress(ff_progress);
+                    }
+                    break;
+                } else if( 0 == compareProgress.compareTo(current_progress) ) {
+                    Log.d(LOG_TAG, "ffBookmark progress and bookmark are same");
+                    if( bookmarkList.size() > compareIndex + 1) {
+                        ff_progress = bookmarkList.get(compareIndex + 1).progress;
+                        mMediaPlayerController.seekTo(ff_progress);
+                        seekBar.setProgress(ff_progress);
+                    }
+                    break;
+                }
+            }
+        }
+        return;
+    }
 
     public void setBookmark() {
         ImageView iv = new ImageView(this);
@@ -532,19 +606,19 @@ public class MainActivity extends AppCompatActivity {
         //iv.setPadding(0, 0, 0, 30);
         iv.setX(x);
 
-        int compareIndex, i, j, bookmark_progress;
-        bookmark_progress = seekBar.getProgress();
+        int compareIndex, i, j, new_bookmark_progress;
+        new_bookmark_progress = seekBar.getProgress();
 
-        Log.d(LOG_TAG, "setBookmark set progress " + bookmark_progress );
+        Log.d(LOG_TAG, "setBookmark set progress " + new_bookmark_progress );
 
         BookMark bookMark = new BookMark();
-        bookMark.progress = bookmark_progress;
+        bookMark.progress = new_bookmark_progress;
         bookMark.position_x = x;
         bookMark.imageView = iv;
 
         synchronized (bookmarkList) {
             if (bookmarkList.size() == 0) { // bookmark 를 처음 만들었을 경우
-                bookMark.progress = bookmark_progress;
+                bookMark.progress = new_bookmark_progress;
                 bookmarkList.add(bookMark);
             } else {   // bookmark 를 두개 이상 만들 경우
                 Log.d(LOG_TAG, "setBookmark before bookmarkList.size() " + bookmarkList.size());
@@ -552,14 +626,17 @@ public class MainActivity extends AppCompatActivity {
                 for (compareIndex = (bookmarkList.size() - 1); compareIndex >= 0; compareIndex--) {
                     Integer compareProgress = bookmarkList.get(compareIndex).progress;
 
-                    if (0 > compareProgress.compareTo(bookmark_progress)) {
-                        Log.d(LOG_TAG, "setBookmark before add a index " + compareIndex+1 + ", bookmark_progress : " + bookmark_progress);
+                    if (0 > compareProgress.compareTo(new_bookmark_progress)) { // 같으면 0,  compareProgress 가 더 작으면 음수, 더 크면 양수
+                        Log.d(LOG_TAG, "setBookmark add a index " + (compareIndex+1) + ", new_bookmark_progress : " + new_bookmark_progress);
 
                         bookmarkList.add(compareIndex+1, bookMark);
                         break;
-                    } else if(0 == compareProgress.compareTo(bookmark_progress)) {
+                    } else if(0 == compareProgress.compareTo(new_bookmark_progress)) {
                         Log.e(LOG_TAG, "samebookmark can't be set");
                         return;
+                    } else if(compareIndex == 0) {
+                        bookmarkList.add(0, bookMark);
+                        Log.d(LOG_TAG, "setBookmark before add a vv index 0 " + ", new_bookmark_progress : " + new_bookmark_progress);
                     }
                 }
             }
@@ -662,8 +739,16 @@ public class MainActivity extends AppCompatActivity {
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 //            Log.d(LOG_TAG, "onProgressChanged fromUser " + fromUser + ", progress " + progress);
             if(fromUser) {
+                Log.d(LOG_TAG, "onProgressChanged Constants.PLAYER_STATUS " + Constants.PLAYER_STATUS );
+
                 if(Constants.PLAYER_STATUS == Constants.PLAYER_STATUS_PLAY)
                     mMediaPlayerController.seekTo(progress);
+                else if( (progress >= 0) && (Constants.FILE_READY_STATUS == Constants.FILE_READY)) {
+                    Date date = new Date((long)progress);
+                    DateFormat formatter = new SimpleDateFormat("mm:ss");
+                    String dateFormatted = formatter.format(date);
+                    tv_elapsed_time.setText(dateFormatted);
+                }
             } else {
 /*                if (progress_check != (int)(progress/100)) {  // 연상량을 줄이기 위해 100 으로 나누어서 사용함(0.1초)
                     updateProgressBarTime(progress);
