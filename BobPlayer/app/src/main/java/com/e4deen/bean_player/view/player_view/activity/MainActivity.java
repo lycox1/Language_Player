@@ -1,26 +1,20 @@
-package com.e4deen.bobplayer;
+package com.e4deen.bean_player.view.player_view.activity;
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
-import android.graphics.Rect;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.Window;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -29,18 +23,22 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 
-import com.e4deen.bobplayer.listview.PlayList_Adapter;
-import com.e4deen.bobplayer.listview.TestCirCleButton;
+import com.e4deen.bean_player.db.Playlist_manager_db;
+import com.e4deen.bean_player.view.player_view.component.CircleButton;
+import com.e4deen.bean_player.data.Constants;
+import com.e4deen.bean_player.view.file_explorer_view.activity.FileSearchActivity;
+import com.e4deen.bean_player.util.LongPressChecker;
+import com.e4deen.bean_player.view.player_view.component.MediaPlayerController;
+import com.e4deen.bean_player.R;
+import com.e4deen.bean_player.util.Vibe;
+import com.e4deen.bean_player.view.player_view.adapter.Adapter_Main_PlayList;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
-import com.e4deen.bobplayer.datatype.FileParcelable;
-import com.e4deen.bobplayer.listview.PlayList_Adapter;
-import com.e4deen.bobplayer.datatype.BookMark;
-import org.w3c.dom.Text;
+import com.e4deen.bean_player.data.FileParcelable;
+import com.e4deen.bean_player.view.player_view.data.BookMark;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -62,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
 
     private AdView mAdView;
     ListView listview_playList;
-    public PlayList_Adapter playList_adapter;
+    public Adapter_Main_PlayList mAdapterMainPlayList;
     ImageButton btn_rew, btn_ff, btn_speed_dn, btn_speed_up, btn_bookmark_rew, btn_bookmark_ff, btn_set_repeat_period,
             btn_set_bookmark, btn_file_search, btn_loopback, btn_play_pause;
     LongPressChecker mLongPressChecker;
@@ -75,11 +73,13 @@ public class MainActivity extends AppCompatActivity {
     EditText et_rew_ff_time;
     ArrayList<BookMark> bookmarkList = new ArrayList<BookMark>();
     float mDensity;
+    public Playlist_manager_db mPLM_DB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Log.d(LOG_TAG, "MainActivity onCreate()" );
 //--------------------------------- Admob Start ---------------------------------------------//
         MobileAds.initialize(this, "ca-app-pub-6490716774426103/8782548872");
         mAdView = (AdView) findViewById(R.id.ad_view);
@@ -90,10 +90,10 @@ public class MainActivity extends AppCompatActivity {
 //--------------------------------- Admob End ---------------------------------------------//
 //----------------------------- File List View Start --------------------------------------//
         listview_playList = (ListView) findViewById(R.id.playList);
-        playList_adapter = new PlayList_Adapter();
-        playList_adapter.resetItems();
-        listview_playList.setAdapter(playList_adapter);
-        playListViewInit();
+        mAdapterMainPlayList = new Adapter_Main_PlayList();
+        mAdapterMainPlayList.resetItems();
+        listview_playList.setAdapter(mAdapterMainPlayList);
+//        playListViewInit();
 //----------------------------- File List View End --------------------------------------//
 //----------------------------- ETC Start --------------------------------------//
         mContext = getApplicationContext();
@@ -131,39 +131,60 @@ public class MainActivity extends AppCompatActivity {
         mVibe = new Vibe(mContext);
 
         mMediaPlayerController.setViews(seekBar, tv_elapsed_time, tv_total_duration, tv_play_speed);
-        playListViewInit();
+        //playListViewInit();
 
         getPermission();
 
         mDensity = getResources().getDisplayMetrics().density;
-//----------------------------- ETC Start --------------------------------------//
+        Log.d(LOG_TAG, "onCreate() density " + mDensity );
+
+        mPLM_DB = new Playlist_manager_db(this);
+        mPLM_DB.open();
+//----------------------------- ETC End --------------------------------------//
+    }
+
+    /**
+     * Called when returning to the activity
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mAdView != null) {
+            mAdView.resume();
+        }
+        Log.d(LOG_TAG, "MainActivity onResume()" );
+        playListViewInit();
     }
 
     int playListViewInit() {
 
-        /*
-        if ( 1 )
-        {
-            // Play List 초기값을 읽어와서 Playlist list view Adapter 에 add 하는 부분
-        }
-        */
-
         Log.d(LOG_TAG, "playListViewInit ");
-/*
-        playList_adapter.addItem("add new items 1");
-        playList_adapter.addItem("add new items 2");
-        playList_adapter.addItem("add new items 3");
-        playList_adapter.addItem("add new items 4");
-        playList_adapter.addItem("add new items 5");
-        playList_adapter.addItem("add new items 6");
-        playList_adapter.addItem("add new items 7");
-        playList_adapter.addItem("add new items 8");
-        playList_adapter.addItem("add new items 9");
-        playList_adapter.addItem("add new items 10");
-*/
+        mAdapterMainPlayList.resetItems();
+
+        if(Constants.mCurrentPlaylistIdx > 0) {
+            int numOfItems = mPLM_DB.getNumOfItemsInPlaylist(Constants.mCurrentPlaylistIdx);
+            ArrayList<String> filelist = mPLM_DB.getFilelist(Constants.mCurrentPlaylistIdx);
+
+            for(int i = 0; i < numOfItems; i++ ) {
+                String filepath = filelist.get(i);
+                //Log.d(LOG_TAG, "playListViewInit fileName " + filepath);
+                int index = filepath.lastIndexOf("/");
+                String fileName = filepath.substring(index+1);
+                mAdapterMainPlayList.addItem(fileName);
+                //Log.d(LOG_TAG, "playListViewInit fileName " + fileName);
+            }
+
+            if(numOfItems > 0) {
+                mMediaPlayerController.setPlayFile(filelist.get(0));
+                mMediaPlayerController.setDuration();
+                Constants.FILE_READY_STATUS = Constants.FILE_READY;
+            }
+        }
+
+        listview_playList.setAdapter(mAdapterMainPlayList);
+
         return E_SUCCESS;
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -255,17 +276,7 @@ public class MainActivity extends AppCompatActivity {
             mAdView.pause();
         }
         super.onPause();
-    }
-
-    /**
-     * Called when returning to the activity
-     */
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (mAdView != null) {
-            mAdView.resume();
-        }
+        Log.d(LOG_TAG, "MainActivity onPause()" );
     }
 
     /**
@@ -277,6 +288,7 @@ public class MainActivity extends AppCompatActivity {
             mAdView.destroy();
         }
         super.onDestroy();
+        Log.d(LOG_TAG, "MainActivity onDestroy()" );
     }
 
     View.OnTouchListener mTouchEvent = new View.OnTouchListener() {
@@ -423,7 +435,8 @@ public class MainActivity extends AppCompatActivity {
                         case MotionEvent.ACTION_DOWN:
                             btn_file_search.setImageResource(R.drawable.ic_file_search);
                             Intent intent = new Intent(mContext, FileSearchActivity.class);
-                            startActivityForResult(intent, 0);
+                            //startActivityForResult(intent, 0);
+                            startActivity(intent);
                             break;
                         case MotionEvent.ACTION_UP:
                             btn_file_search.setImageResource(R.drawable.ic_file_search);
@@ -647,7 +660,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    //startActivityForResult 로 호출한 activity 종료시에 호출되는 callback
+ /*   //startActivityForResult 로 호출한 activity 종료시에 호출되는 callback
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
@@ -659,28 +672,27 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(LOG_TAG, "Get Intent. file path : " + fileListParcelable.get(0).getFullPath());
 
                 playListViewUpdate(fileListParcelable);
-                /*
-                File file = new File(fileListParcelable.get(0).getFilePath());
-                Log.d(LOG_TAG,"onActivityResult test start ------------------------------");
-                Log.d(LOG_TAG,"file.getAbsolutePath() : " + file.getAbsolutePath());
-                Log.d(LOG_TAG,"file.getPath() : " + file.getPath());
-                Log.d(LOG_TAG,"file.getName() : " + file.getName());
-                Log.d(LOG_TAG,"file.getParent() : " + file.getParent());
-                Log.d(LOG_TAG,"onActivityResult test end ------------------------------");
-                */
-                /*
-                Get Intent. file path : /vendor/lib/lib-imsSDP.so
-                onActivityResult test start ------------------------------
-                file.getAbsolutePath() : /vendor/lib/lib-imsSDP.so
-                file.getPath() : /vendor/lib/lib-imsSDP.so
-                file.getName() : lib-imsSDP.so
-                file.getParent() : /vendor/lib
-                onActivityResult test end ------------------------------
-                */
+
+//                File file = new File(fileListParcelable.get(0).getFilePath());
+//                Log.d(LOG_TAG,"onActivityResult test start ------------------------------");
+//                Log.d(LOG_TAG,"file.getAbsolutePath() : " + file.getAbsolutePath());
+//                Log.d(LOG_TAG,"file.getPath() : " + file.getPath());
+//                Log.d(LOG_TAG,"file.getName() : " + file.getName());
+//                Log.d(LOG_TAG,"file.getParent() : " + file.getParent());
+//                Log.d(LOG_TAG,"onActivityResult test end ------------------------------");
+
+//                Get Intent. file path : /vendor/lib/lib-imsSDP.so
+//                onActivityResult test start ------------------------------
+//                file.getAbsolutePath() : /vendor/lib/lib-imsSDP.so
+//                file.getPath() : /vendor/lib/lib-imsSDP.so
+//                file.getName() : lib-imsSDP.so
+//                file.getParent() : /vendor/lib
+//                onActivityResult test end ------------------------------
                 break;
 
         }
     }
+*/
 
     int playListViewUpdate(ArrayList<FileParcelable> filelist) {
 
@@ -689,16 +701,16 @@ public class MainActivity extends AppCompatActivity {
         }
 
         Log.d(LOG_TAG, "playListViewUpdate ");
-        playList_adapter.resetItems();
+        mAdapterMainPlayList.resetItems();
 
         if(filelist.size() > 0) {
             for (int i = 0; i < filelist.size(); i++) {
                 Log.d(LOG_TAG, "playListViewUpdate addItem " + filelist.get(i).getFileName());
                 Log.d(LOG_TAG, "playListViewUpdate addItem " + filelist.get(i).getFullPath());
-                playList_adapter.addItem(filelist.get(i).getFileName());
+                mAdapterMainPlayList.addItem(filelist.get(i).getFileName());
             }
 
-            listview_playList.setAdapter(playList_adapter);
+            listview_playList.setAdapter(mAdapterMainPlayList);
 
             mMediaPlayerController.setPlayFile(filelist.get(0).getFullPath());
             mMediaPlayerController.setDuration();

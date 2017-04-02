@@ -17,11 +17,34 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    productFlavors {
+        dev {
+            minSdkVersion 21
+        }
+        prod {
+            minSdkVersion 19
+        }
+    }
+    sourceSets {
+        main {
+            res.srcDirs =
+                    [
+                            'src/main/res/layout/view_playlist_manager/activity/fragment/custom_dialog',
+                            'src/main/res/layout/view_playlist_manager/activity/fragment/listview',
+                            'src/main/res/layout/view_playlist_manager/activity/fragment',
+                            'src/main/res/layout/view_playlist_manager/activity',
+                            'src/main/res/layout/view_player_main/activity/fragment/listview',
+                            'src/main/res/layout/view_player_main/activity/fragment',
+                            'src/main/res/layout/view_player_main/activity',
+                            'src/main/res'
+                    ]
+        }
+    }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     compile 'com.android.support:appcompat-v7:25.1.1'
