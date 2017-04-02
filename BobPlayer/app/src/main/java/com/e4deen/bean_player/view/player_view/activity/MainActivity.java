@@ -3,6 +3,7 @@ package com.e4deen.bean_player.view.player_view.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.ColorMatrixColorFilter;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
@@ -69,8 +70,8 @@ public class MainActivity extends AppCompatActivity {
     Context mContext;
     MediaPlayerController mMediaPlayerController;
     SeekBar seekBar;
-    TextView tv_total_duration, tv_elapsed_time, tv_play_speed;
-    EditText et_rew_ff_time;
+    TextView tv_total_duration, tv_elapsed_time, tv_play_speed, tv_rew_ff_time;
+
     ArrayList<BookMark> bookmarkList = new ArrayList<BookMark>();
     float mDensity;
     public Playlist_manager_db mPLM_DB;
@@ -112,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
         tv_total_duration = (TextView) findViewById(R.id.tv_total_duration);
         tv_play_speed = (TextView) findViewById(R.id.tv_play_speed);
 
-        et_rew_ff_time = (EditText) findViewById(R.id.et_rew_ff_time);
+        tv_rew_ff_time = (TextView) findViewById(R.id.tv_rew_ff_time);
 
         btn_rew.setOnTouchListener(mTouchEvent);
         btn_ff.setOnTouchListener(mTouchEvent);
@@ -298,6 +299,8 @@ public class MainActivity extends AppCompatActivity {
 
             int action = event.getAction();
             int id = v.getId();
+            ImageButton img_btn = (ImageButton) v;
+
 
             if (action == MotionEvent.ACTION_DOWN) {
                 mVibe.vibration(80);
@@ -307,12 +310,15 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.btn_rew:
                     switch (action) {
                         case MotionEvent.ACTION_DOWN:
-                            btn_rew.setImageResource(R.drawable.ic_common_press);
+                            //btn_rew.setImageResource(R.drawable.ic_common_press);
+                            img_btn.setColorFilter(new ColorMatrixColorFilter(Constants.NEGATIVE));
+
                             if(Constants.FILE_READY_STATUS == Constants.FILE_READY)
-                                mMediaPlayerController.rewPlay(Integer.valueOf(et_rew_ff_time.getText().toString()) * Constants.SEC);
+                                mMediaPlayerController.rewPlay(Integer.valueOf(tv_rew_ff_time.getText().toString()) * Constants.SEC);
                             break;
                         case MotionEvent.ACTION_UP:
-                            btn_rew.setImageResource(R.drawable.ic_rew_release);
+                            img_btn.clearColorFilter();
+                            //btn_rew.setImageResource(R.drawable.ic_rew_release);
                             break;
                     }
                     break;
@@ -320,12 +326,14 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.btn_ff:
                     switch (action) {
                         case MotionEvent.ACTION_DOWN:
-                            btn_ff.setImageResource(R.drawable.ic_common_press);
+                            //btn_ff.setImageResource(R.drawable.ic_common_press);
+                            img_btn.setColorFilter(new ColorMatrixColorFilter(Constants.NEGATIVE));
                             if(Constants.FILE_READY_STATUS == Constants.FILE_READY)
-                                mMediaPlayerController.ffPlay(Integer.valueOf(et_rew_ff_time.getText().toString()) * Constants.SEC );
+                                mMediaPlayerController.ffPlay(Integer.valueOf(tv_rew_ff_time.getText().toString()) * Constants.SEC );
                             break;
                         case MotionEvent.ACTION_UP:
-                            btn_ff.setImageResource(R.drawable.ic_ff_release);
+                            img_btn.clearColorFilter();
+                            //btn_ff.setImageResource(R.drawable.ic_ff_release);
                             break;
                     }
                     break;
@@ -333,31 +341,31 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.btn_speed_up:
                     switch (action) {
                         case MotionEvent.ACTION_DOWN:
-                            btn_speed_up.setImageResource(R.drawable.ic_common_press);
+                            img_btn.setColorFilter(new ColorMatrixColorFilter(Constants.NEGATIVE));
                             if(Constants.FILE_READY_STATUS == Constants.FILE_READY)
                                 mMediaPlayerController.speedUp();
                             break;
                         case MotionEvent.ACTION_UP:
-                            btn_speed_up.setImageResource(R.drawable.ic_speed_up_release);
+                            img_btn.clearColorFilter();
                             break;
                     }
                     break;
                 case R.id.btn_speed_dn:
                     switch (action) {
                         case MotionEvent.ACTION_DOWN:
-                            btn_speed_dn.setImageResource(R.drawable.ic_common_press);
+                            img_btn.setColorFilter(new ColorMatrixColorFilter(Constants.NEGATIVE));
                             if(Constants.FILE_READY_STATUS == Constants.FILE_READY)
                                 mMediaPlayerController.speedDown();
                             break;
                         case MotionEvent.ACTION_UP:
-                            btn_speed_dn.setImageResource(R.drawable.ic_speed_down_release);
+                            img_btn.clearColorFilter();
                             break;
                     }
                     break;
                 case R.id.btn_play_pause_id:
                     switch (action) {
                         case MotionEvent.ACTION_DOWN:
-                            btn_play_pause.setImageResource(R.drawable.ic_common_press);
+                            img_btn.setColorFilter(new ColorMatrixColorFilter(Constants.NEGATIVE));
                             if(Constants.FILE_READY_STATUS == Constants.FILE_READY) {
                                 if(Constants.PLAYER_STATUS == Constants.PLAYER_STATUS_PLAY) {
                                     Log.d(LOG_TAG, "btn_play_pause_id call pausePlay()");
@@ -433,13 +441,13 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.btn_file_search:
                     switch (action) {
                         case MotionEvent.ACTION_DOWN:
-                            btn_file_search.setImageResource(R.drawable.ic_file_search);
+                            img_btn.setColorFilter(new ColorMatrixColorFilter(Constants.NEGATIVE));
                             Intent intent = new Intent(mContext, FileSearchActivity.class);
                             //startActivityForResult(intent, 0);
                             startActivity(intent);
                             break;
                         case MotionEvent.ACTION_UP:
-                            btn_file_search.setImageResource(R.drawable.ic_file_search);
+                            img_btn.clearColorFilter();
                             break;
                     }
                     break;
@@ -449,7 +457,7 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.btn_set_bookmark:
                     switch (action) {
                         case MotionEvent.ACTION_DOWN:
-                            btn_set_bookmark.setImageResource(R.drawable.ic_common_press);
+                            img_btn.setColorFilter(new ColorMatrixColorFilter(Constants.NEGATIVE));
                             setBookmark();
                             //setRepeatPeriod_A();
                             //setRepeatPeriod_B();
@@ -457,7 +465,7 @@ public class MainActivity extends AppCompatActivity {
 
                             break;
                         case MotionEvent.ACTION_UP:
-                            btn_set_bookmark.setImageResource(R.drawable.ic_set_bookmark_release);
+                            img_btn.clearColorFilter();
                             mLongPressChecker.deliverMotionEvent(v, event);
                             break;
                     }
@@ -465,13 +473,13 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.btn_set_repeat_period:
                     switch (action) {
                         case MotionEvent.ACTION_DOWN:
-                            btn_set_repeat_period.setImageResource(R.drawable.ic_common_press);
+                            img_btn.setColorFilter(new ColorMatrixColorFilter(Constants.NEGATIVE));
 //                            set_period_repeat();
                             mLongPressChecker.deliverMotionEvent(v, event);
                             break;
 
                         case MotionEvent.ACTION_UP:
-                            btn_set_repeat_period.setImageResource(R.drawable.ic_set_repeat_period_release);
+                            img_btn.clearColorFilter();
                             mLongPressChecker.deliverMotionEvent(v, event);
                             break;
                     }
@@ -494,26 +502,27 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.btn_bookmark_rew:
                     switch (action) {
                         case MotionEvent.ACTION_DOWN:
-                            btn_bookmark_rew.setImageResource(R.drawable.ic_common_press);
+                            img_btn.setColorFilter(new ColorMatrixColorFilter(Constants.NEGATIVE));
                             rewBookmark();
                             break;
                         case MotionEvent.ACTION_UP:
-                            btn_bookmark_rew.setImageResource(R.drawable.ic_bookmark_rew_release);
+                            img_btn.clearColorFilter();
                             break;
                     }
                     break;
                 case R.id.btn_bookmark_ff:
                     switch (action) {
                         case MotionEvent.ACTION_DOWN:
-                            btn_bookmark_ff.setImageResource(R.drawable.ic_common_press);
+                            img_btn.setColorFilter(new ColorMatrixColorFilter(Constants.NEGATIVE));
                             ffBookmark();
                             break;
                         case MotionEvent.ACTION_UP:
-                            btn_bookmark_ff.setImageResource(R.drawable.ic_bookmark_ff_release);
+                            img_btn.clearColorFilter();
                             break;
                     }
                     break;
             }
+
             return true;
         }
 

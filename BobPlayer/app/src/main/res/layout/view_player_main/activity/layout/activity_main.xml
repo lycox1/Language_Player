@@ -96,221 +96,275 @@
             </LinearLayout>
 
             <LinearLayout
-                android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
+                android:layout_marginBottom="0dp"
                 android:layout_weight="0.8"
-                android:weightSum="1"
-                android:background="@drawable/image_line_full"
-                android:layout_marginBottom="10dp">
+                android:background="@android:color/background_light"
+                android:orientation="horizontal"
+                android:weightSum="1">
 
                 <LinearLayout
-                        android:orientation="vertical"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="0.277"
-                        android:gravity="center_vertical"
-                        android:weightSum="1"
-                        android:scrollbarSize="0dp">
-
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.277"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical"
+                    android:scrollbarSize="0dp"
+                    android:weightSum="1">
 
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="0.5">
+                        android:layout_weight="0.55">
 
-                        <TextView
-                            android:text="FF/REW "
+                        <ImageButton
+                            android:id="@+id/btn_speed_up"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:id="@+id/textView2"
-                            android:layout_toLeftOf="@+id/et_rew_ff_time"
-                            android:layout_alignBaseline="@+id/et_rew_ff_time"
+                            android:layout_alignParentLeft="true"
+                            android:layout_alignParentTop="true"
+                            android:layout_marginLeft="5dp"
+                            android:background="@android:color/background_light"
+                            android:scaleType="fitXY"
+                            ads:srcCompat="@drawable/ic_speed_up_new"/>
+
+                        <ImageView
+                            android:id="@+id/btn_speed_middle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignStart="@+id/btn_speed_up"
+                            android:layout_below="@+id/btn_speed_up"
+                            android:layout_margin="0dp"
+                            android:scaleType="fitXY"
+                            ads:srcCompat="@drawable/ic_speed_middle"/>
+
+                        <ImageButton
+                            android:id="@+id/btn_speed_dn"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentBottom="false"
+                            android:layout_alignParentRight="false"
+                            android:layout_alignStart="@+id/btn_speed_middle"
+                            android:layout_below="@+id/btn_speed_middle"
+                            android:layout_margin="0dp"
+                            android:background="@android:color/background_light"
+                            android:scaleType="fitXY"
+                            ads:srcCompat="@drawable/ic_speed_down_new"/>
+
+                        <TextView
+                            android:id="@+id/tv_speed"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignStart="@+id/btn_speed_dn"
+                            android:layout_below="@+id/btn_speed_dn"
+                            android:layout_marginLeft="3dp"
+                            android:text="Speed"
+                            android:textColor="@color/colorPrimary"
                             android:textSize="12sp"/>
 
-                        <EditText
+                        <TextView
+                            android:id="@+id/tv_play_speed"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="3"
-
-                            android:id="@+id/et_rew_ff_time"
+                            android:layout_alignLeft="@+id/tv_speed"
                             android:layout_alignParentRight="false"
-                            android:layout_toLeftOf="@+id/textView"
-                            android:layout_alignBaseline="@+id/textView"
-                            android:textSize="12sp"
-                            android:inputType="numberSigned|numberDecimal"/>
+                            android:layout_alignParentTop="false"
+                            android:layout_below="@+id/tv_speed"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginRight="10dp"
+                            android:text="1.0"
+                            android:textColor="@color/colorPrimary"
+                            android:textSize="12sp"/>
+
+                        <ImageButton
+                            android:id="@+id/btn_jump_period_up"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignBottom="@+id/btn_speed_up"
+                            android:layout_alignParentTop="false"
+                            android:layout_marginLeft="5dp"
+                            android:layout_toRightOf="@+id/btn_speed_up"
+                            android:background="@android:color/background_light"
+                            android:scaleType="fitXY"
+                            ads:srcCompat="@drawable/ic_speed_up_new"/>
+
+                        <ImageView
+                            android:id="@+id/btn_jump_period_middle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignStart="@+id/btn_jump_period_up"
+                            android:layout_below="@+id/btn_jump_period_up"
+                            android:layout_margin="0dp"
+                            android:background="@android:color/background_light"
+                            android:scaleType="fitXY"
+                            ads:srcCompat="@drawable/ic_jump_middle"/>
+
+                        <ImageButton
+                            android:id="@+id/btn_jump_period_down"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignStart="@+id/btn_jump_period_middle"
+                            android:layout_below="@+id/btn_jump_period_middle"
+                            android:layout_margin="0dp"
+                            android:background="@android:color/background_light"
+                            android:scaleType="fitXY"
+                            ads:srcCompat="@drawable/ic_speed_down_new"/>
 
                         <TextView
+                            android:id="@+id/tv_ff_rew"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignStart="@+id/btn_jump_period_down"
+                            android:layout_below="@+id/btn_jump_period_down"
+                            android:layout_marginLeft="10dp"
                             android:text="Sec"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:id="@+id/textView"
-                            android:layout_alignParentRight="true"
-                            android:layout_above="@+id/btn_rew"
-                            android:textSize="12sp"
-                            android:layout_marginBottom="10dp"/>
+                            android:textColor="@color/colorPrimary"
+                            android:textSize="12sp"/>
 
-                        <ImageButton
+                        <TextView
+                            android:id="@+id/tv_rew_ff_time"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            ads:srcCompat="@drawable/ic_ff_release"
-                            android:id="@+id/btn_ff"
-                            android:layout_alignParentBottom="true"
-                            android:background="@android:color/background_light"
-                            android:layout_marginBottom="10dp"
-                            android:layout_marginLeft="0dp"
-                            android:layout_alignParentRight="true"
-                            android:layout_marginRight="0dp"/>
 
-                        <ImageButton
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            ads:srcCompat="@drawable/ic_rew_release"
-                            android:id="@+id/btn_rew"
-                            android:background="@android:color/background_light"
-                            android:layout_alignTop="@+id/btn_ff"
-                            android:layout_toStartOf="@+id/btn_ff"
-                            android:layout_marginBottom="10dp"
-                            android:layout_marginRight="5dp"/>
+                            android:layout_alignParentRight="false"
+                            android:layout_alignParentTop="false"
+                            android:layout_alignStart="@+id/tv_ff_rew"
+                            android:layout_below="@+id/tv_ff_rew"
+                            android:layout_marginLeft="5dp"
+                            android:inputType="numberSigned|numberDecimal"
+                            android:text="3"
+                            android:textColor="@color/colorPrimary"
+                            android:textSize="12sp"/>
+
                     </RelativeLayout>
 
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="0.5">
+                        android:layout_weight="0.45">
 
                         <ImageButton
+                            android:id="@+id/btn_rew"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            ads:srcCompat="@drawable/ic_speed_down_release"
-                            android:id="@+id/btn_speed_dn"
-                            android:background="@android:color/background_light"
-                            android:layout_marginTop="10dp"
+                            android:layout_alignParentLeft="true"
                             android:layout_alignParentTop="true"
-                            android:layout_toLeftOf="@+id/btn_speed_up"
-                            android:layout_marginRight="5dp"/>
+                            android:layout_centerVertical="false"
+                            android:layout_marginLeft="5dp"
+                            android:layout_marginTop="10dp"
+                            android:background="@android:color/background_light"
+                            android:scaleType="fitXY"
+                            ads:srcCompat="@drawable/ic_rew_new2"/>
 
                         <ImageButton
+                            android:id="@+id/btn_ff"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            ads:srcCompat="@drawable/ic_speed_up_release"
-                            android:id="@+id/btn_speed_up"
-                            android:layout_alignParentTop="true"
-                            android:background="@android:color/background_light"
-                            android:layout_marginTop="10dp"
-                            android:layout_marginLeft="0dp"
-                            android:layout_alignParentRight="true"
-                            android:layout_marginRight="0dp"/>
-
-                        <TextView
-                            android:text="Speed : "
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:id="@+id/textView4"
-                            android:layout_toLeftOf="@+id/tv_play_speed"
-                            android:layout_alignBaseline="@+id/tv_play_speed"/>
-
-                        <TextView
-                            android:text="1.0"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:layout_alignBottom="@+id/btn_rew"
+                            android:layout_alignParentRight="false"
                             android:layout_alignParentTop="false"
-                            android:id="@+id/tv_play_speed"
-                            android:layout_below="@+id/btn_speed_up"
-                            android:layout_alignParentRight="true"
-                            android:layout_marginRight="10dp"
-                            />
+                            android:layout_centerVertical="false"
+                            android:layout_marginLeft="5dp"
+                            android:layout_marginTop="10dp"
+                            android:layout_toRightOf="@+id/btn_rew"
+                            android:background="@android:color/background_light"
+                            android:scaleType="fitXY"
+                            ads:srcCompat="@drawable/ic_ff_new2"/>
                     </RelativeLayout>
+
                 </LinearLayout>
 
-                    <LinearLayout
-                        android:orientation="horizontal"
-                        android:layout_height="match_parent"
-                        android:layout_weight="0.446"
-                        android:layout_width="0dp">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.446"
+                    android:orientation="horizontal">
 
-                        <RelativeLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
+                    <RelativeLayout
+                        android:id="@+id/RL_Circle"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp"
+                        android:layout_weight="1">
+
+                    </RelativeLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.277"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical"
+                    android:weightSum="1">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="0.55">
+
+                        <ImageButton
+                            android:id="@+id/btn_set_repeat_period"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentBottom="true"
+                            android:layout_alignParentLeft="true"
+                            android:layout_alignParentStart="false"
+                            android:layout_alignParentTop="false"
+                            android:layout_marginBottom="10dp"
+                            android:layout_marginTop="0dp"
+                            android:background="@android:color/background_light"
+                            ads:srcCompat="@drawable/ic_repeat_new"/>
+
+                        <ImageButton
+                            android:id="@+id/btn_set_bookmark"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignBottom="@+id/btn_set_repeat_period"
+                            android:layout_alignParentLeft="false"
+                            android:layout_alignParentRight="false"
+                            android:layout_alignParentTop="false"
                             android:layout_marginLeft="5dp"
-                            android:layout_marginRight="5dp"
-                            android:id="@+id/RL_Circle">
+                            android:layout_marginTop="10dp"
+                            android:layout_toRightOf="@+id/btn_set_repeat_period"
+                            android:background="@android:color/background_light"
+                            android:elevation="1dp"
+                            ads:srcCompat="@drawable/ic_bookmark_new"/>
 
-                        </RelativeLayout>
+                    </RelativeLayout>
 
-                    </LinearLayout>
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="0.45">
 
-                    <LinearLayout
-                        android:orientation="vertical"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="0.277"
-                        android:gravity="center_vertical"
-                        android:weightSum="1">
+                        <ImageButton
+                            android:id="@+id/btn_bookmark_rew"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_alignParentTop="true"
+                            android:layout_marginLeft="5dp"
+                            android:layout_marginTop="10dp"
+                            android:background="@android:color/background_light"
+                            ads:srcCompat="@drawable/ic_bookmark_rew_new"/>
 
-                        <RelativeLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="0dp"
-                            android:layout_weight="0.5">
+                        <ImageButton
+                            android:id="@+id/btn_bookmark_ff"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignBottom="@+id/btn_bookmark_rew"
+                            android:layout_marginLeft="5dp"
+                            android:layout_toRightOf="@+id/btn_bookmark_rew"
+                            android:background="@android:color/background_light"
+                            ads:srcCompat="@drawable/ic_bookmark_ff_new"/>
 
-                            <ImageButton
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                ads:srcCompat="@drawable/ic_bookmark_rew_release"
-                                android:id="@+id/btn_bookmark_rew"
-                                android:layout_alignParentLeft="?attr/isLightTheme"
-                                android:layout_alignParentBottom="?attr/isLightTheme"
-                                android:background="@android:color/background_light"
-                                android:layout_marginLeft="0dp"
-                                android:layout_marginBottom="10dp"
-                                android:layout_marginRight="0dp"/>
+                    </RelativeLayout>
 
-                            <ImageButton
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                ads:srcCompat="@drawable/ic_bookmark_ff_release"
-                                android:id="@+id/btn_bookmark_ff"
-                                android:background="@android:color/background_light"
-                                android:layout_marginBottom="10dp"
-                                android:layout_alignParentBottom="?attr/isLightTheme"
-                                android:layout_marginLeft="5dp"
-                                android:layout_toRightOf="@+id/btn_bookmark_rew"/>
-                        </RelativeLayout>
-
-                        <RelativeLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="0dp"
-                            android:layout_weight="0.5"
-                            android:elevation="1dp">
-
-                            <ImageButton
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                ads:srcCompat="@drawable/ic_set_bookmark_release"
-                                android:id="@+id/btn_set_bookmark"
-                                android:background="@android:color/background_light"
-                                android:layout_alignParentLeft="false"
-                                android:layout_alignParentTop="true"
-                                android:layout_marginTop="10dp"
-                                android:layout_alignParentRight="false"
-                                android:layout_toRightOf="@+id/btn_set_repeat_period"
-                                android:layout_marginLeft="5dp"
-                                android:elevation="1dp"/>
-
-                            <ImageButton
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                ads:srcCompat="@drawable/ic_set_repeat_period_release"
-                                android:id="@+id/btn_set_repeat_period"
-                                android:background="@android:color/background_light"
-                                android:layout_alignParentStart="false"
-                                android:layout_alignParentLeft="true"
-                                android:layout_marginTop="10dp"
-                                android:layout_alignParentTop="true"
-                                />
-                        </RelativeLayout>
-                    </LinearLayout>
+                </LinearLayout>
             </LinearLayout>
 
         </LinearLayout>
