@@ -1,47 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:app="http://schemas.android.com/apk/res-auto"
-                android:gravity="center_vertical"
-                android:background="#22CBD9"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:background="@color/colorPrimary"
+                android:gravity="center_vertical">
 
     <ImageView
+        android:id="@+id/iv_log"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:srcCompat="@drawable/ic_title"
-        android:id="@+id/imageView"
-        android:layout_marginLeft="20dp"
-        android:layout_centerVertical="true"/>
-
-    <ImageButton
-        android:id="@+id/btn_loopback"
-        android:layout_alignParentLeft="false"
-        android:background="@drawable/ic_headset"
+        android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:layout_height="30dp"
-        android:layout_width="30dp"
-        android:layout_toLeftOf="@+id/btn_file_search"
-        android:layout_marginRight="20dp"/>
-
-    <TextView
-        android:text="Loopback Player"
-        android:id="@+id/title"
-        android:textSize="18sp"
-        android:textColor="#fff"
-        android:gravity="center_vertical"
-        android:layout_marginLeft="17dp"
-        android:layout_toRightOf="@+id/imageView"
-        android:layout_width="match_parent"
-        android:layout_height="46dp"
-        android:layout_centerHorizontal="false"/>
+        android:layout_marginRight="5dp"
+        app:srcCompat="@drawable/iv_title"/>
 
     <ImageButton
         android:id="@+id/btn_file_search"
-        android:layout_alignParentRight="true"
-        android:background="@drawable/ic_file_search"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="false"
         android:layout_centerVertical="true"
-        android:layout_marginRight="15dp"
-        android:layout_height="30dp"
-        android:layout_width="30dp"/>
+        android:background="@drawable/ic_file_search"
+        />
 </RelativeLayout>

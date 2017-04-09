@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
     ListView listview_playList;
     public Adapter_Main_PlayList mAdapterMainPlayList;
     ImageButton btn_rew, btn_ff, btn_speed_dn, btn_speed_up, btn_bookmark_rew, btn_bookmark_ff, btn_set_repeat_period,
-            btn_set_bookmark, btn_file_search, btn_loopback, btn_play_pause;
+            btn_set_bookmark, btn_file_search, btn_play_pause;
     LongPressChecker mLongPressChecker;
     ArrayList<FileParcelable> fileListParcelable;
     Vibe mVibe;
@@ -111,8 +111,8 @@ public class MainActivity extends AppCompatActivity {
 
         tv_elapsed_time = (TextView) findViewById(R.id.tv_elapsed_time);
         tv_total_duration = (TextView) findViewById(R.id.tv_total_duration);
-        tv_play_speed = (TextView) findViewById(R.id.tv_play_speed);
 
+        tv_play_speed = (TextView) findViewById(R.id.tv_play_speed);
         tv_rew_ff_time = (TextView) findViewById(R.id.tv_rew_ff_time);
 
         btn_rew.setOnTouchListener(mTouchEvent);
@@ -128,6 +128,7 @@ public class MainActivity extends AppCompatActivity {
 
         seekBar = (SeekBar) findViewById(R.id.seekbar);
         seekBar.setOnSeekBarChangeListener(mSeekBarChangeListner);
+        seekBar.getThumb().mutate().setAlpha(0);
 
         mVibe = new Vibe(mContext);
 
@@ -207,11 +208,9 @@ public class MainActivity extends AppCompatActivity {
         Toolbar parent = (Toolbar) actionbar.getParent();
         parent.setContentInsetsAbsolute(0, 0);
 
-        btn_loopback = (ImageButton) findViewById(R.id.btn_loopback);
         btn_file_search = (ImageButton) findViewById(R.id.btn_file_search);
 
         btn_file_search.setOnTouchListener(mTouchEvent);
-        btn_loopback.setOnTouchListener(mTouchEvent);
 
         RelativeLayout RL_Circle = (RelativeLayout) findViewById(R.id.RL_Circle);
 
@@ -295,7 +294,9 @@ public class MainActivity extends AppCompatActivity {
     View.OnTouchListener mTouchEvent = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
-//            Log.d(LOG_TAG,"onTouch id " + v.getId());
+            Log.d(LOG_TAG,"onTouch id " + v.getId() );
+            Log.d(LOG_TAG,"onTouch id log test " + R.id.btn_play_pause_id );
+
 
             int action = event.getAction();
             int id = v.getId();
@@ -365,7 +366,6 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.btn_play_pause_id:
                     switch (action) {
                         case MotionEvent.ACTION_DOWN:
-                            img_btn.setColorFilter(new ColorMatrixColorFilter(Constants.NEGATIVE));
                             if(Constants.FILE_READY_STATUS == Constants.FILE_READY) {
                                 if(Constants.PLAYER_STATUS == Constants.PLAYER_STATUS_PLAY) {
                                     Log.d(LOG_TAG, "btn_play_pause_id call pausePlay()");
@@ -386,6 +386,16 @@ public class MainActivity extends AppCompatActivity {
                             }
                             break;
                     }
+
+
+                    if(Constants.PLAYER_STATUS == Constants.PLAYER_STATUS_PLAY) {
+                        btn_play_pause.setImageResource(R.drawable.btn_pause);
+                        Constants.PLAYER_STATUS = Constants.PLAYER_STATUS_PAUSE;
+                    } else {
+                        btn_play_pause.setImageResource(R.drawable.btn_play);
+                        Constants.PLAYER_STATUS = Constants.PLAYER_STATUS_PLAY;
+                    }
+
                     break;
 
 /*
