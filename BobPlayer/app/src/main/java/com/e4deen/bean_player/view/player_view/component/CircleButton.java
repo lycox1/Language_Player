@@ -9,10 +9,14 @@ import android.view.MotionEvent;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
+import android.widget.TextView;
 
 import com.e4deen.bean_player.data.Constants;
 import com.e4deen.bean_player.R;
 import com.e4deen.bean_player.util.Vibe;
+import com.e4deen.bean_player.view.player_view.activity.MainActivity;
+
+import org.w3c.dom.Text;
 
 /**
  * Created by user on 2016-12-21.
@@ -28,27 +32,28 @@ public class CircleButton extends RelativeLayout {
     double radToDegree = 180 / Math.PI;
     MediaPlayerController mMediaPlayerController;
     Context mContext;
-    Vibe vibe;
+    //Vibe vibe;
     SeekBar seekBar;
     int mLayoutWidth, mLayoutHeight, mRotatorWidth, mRotatorHeight;
     private ImageView ivRotor;
     private Bitmap bmpRotorOn;
     int test = 0;
     int accum_Deg, accum_mSec;
+    public TextView tv_ShiftTime;
+    RelativeLayout RL_Circle;
 
     public CircleButton(Context context, int layoutWidth, int layoutHeight) {
         super(context);
         mContext = context;
-        vibe = new Vibe(mContext);
+        //vibe = new Vibe(mContext);
+
+        RL_Circle = (RelativeLayout) ((MainActivity)mContext).findViewById(R.id.RL_Circle);
 
         mLayoutWidth = layoutWidth;
         mLayoutHeight = layoutHeight;
 
         mRotatorWidth = (layoutWidth > layoutHeight) ? layoutHeight:layoutWidth;
         mRotatorHeight = (layoutWidth > layoutHeight) ? layoutHeight:layoutWidth;
-
-//        mLayoutWidth = (layoutWidth > layoutHeight) ? layoutHeight:layoutWidth;
-//        mLayoutHeight = (layoutWidth > layoutHeight) ? layoutHeight:layoutWidth;
 
         int rotoron = R.drawable.center_circle;
         Bitmap srcon = BitmapFactory.decodeResource(mContext.getResources(), rotoron);
@@ -219,6 +224,20 @@ public class CircleButton extends RelativeLayout {
                     }
                     break;
 */
+                case MotionEvent.ACTION_DOWN:
+
+                    tv_ShiftTime = new TextView(mContext);
+                    RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+                    params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+                    params.addRule(RelativeLayout.CENTER_HORIZONTAL);
+                    params.setMargins(0,0,0,0);
+
+                    tv_ShiftTime.setLayoutParams(params);
+                    tv_ShiftTime.setPadding(0,0,0,0);
+
+                    RL_Circle.addView(tv_ShiftTime, params);
+                    Vibe.Vibe_Start();
+                    break;
 
                 case MotionEvent.ACTION_MOVE:
                     //if( jog_drag_state == Constants.JOG_DRAG_START) {
@@ -232,6 +251,17 @@ public class CircleButton extends RelativeLayout {
 
                         accum_Deg += (new_deg - old_deg);
                         accum_mSec += shiftTime;
+                        //String round_shift_time = accum_mSec/1000.0;
+                        //String.format("%.1f", (float)accum_mSec/1000.0f);
+                        String text_shift_time;
+
+                        if(accum_mSec >= 0) {
+                            text_shift_time = " >> FF :" + String.format("%.1f", (float)accum_mSec/1000.0f) + " Sec";
+                        } else {
+                            text_shift_time = " << Rew :" + String.format("%.1f", (float)accum_mSec/1000.0f) + " Sec";
+                        }
+                        tv_ShiftTime.setText(text_shift_time);
+
                         Log.d(LOG_TAG, "MotionEvent.ACTION_MOVE accum_Deg " + accum_Deg + ", accum_mSec " + accum_mSec);
                         if(Constants.FILE_READY_STATUS == Constants.FILE_READY) {
                             if (shiftTime < 0) {
@@ -250,6 +280,12 @@ public class CircleButton extends RelativeLayout {
                         matrix.postRotate((float) new_deg, mRotatorWidth/2, mRotatorHeight/2);//getWidth()/2, getHeight()/2);
                         ivRotor.setImageMatrix(matrix);
                     }
+                    break;
+
+                case MotionEvent.ACTION_UP:
+                    tv_ShiftTime.setText("");
+                    Vibe.Vibe_Stop();
+                    accum_mSec = 0;
                     break;
             }
             return true;

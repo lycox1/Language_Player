@@ -45,7 +45,7 @@ public class FileSearchActivity extends AppCompatActivity {
         fragmentTransaction.add(R.id.layout_playlist_manager, new Frag_plm_playlist(mContext,mPLM_DB), Constants.FRAG_PLM_PLAYLIST);
         fragmentTransaction.commit();
         fm.executePendingTransactions();
-        Constants.plm_state = Constants.IDX_PLM_PLAYLIST;
+        Constants.frag_plm_state = Constants.IDX_PLM_PLAYLIST;
         getPermission();
     }
 
@@ -88,14 +88,14 @@ public class FileSearchActivity extends AppCompatActivity {
         if(fragNum == Constants.IDX_PLM_FILELIST) {
             fragmentTransaction.replace(R.id.layout_playlist_manager, new Frag_plm_filelist(mContext, mPLM_DB), Constants.FRAG_PLM_FILELIST);
             fragmentTransaction.addToBackStack(null);
-            Constants.plm_state = Constants.IDX_PLM_FILELIST;
+            Constants.frag_plm_state = Constants.IDX_PLM_FILELIST;
         } else if(fragNum == Constants.IDX_PLM_PLAYLIST) {
             fragmentTransaction.replace(R.id.layout_playlist_manager, new Frag_plm_playlist(mContext, mPLM_DB), Constants.FRAG_PLM_PLAYLIST);
-            Constants.plm_state = Constants.IDX_PLM_PLAYLIST;
+            Constants.frag_plm_state = Constants.IDX_PLM_PLAYLIST;
             fragmentTransaction.addToBackStack(null);
         } else if(fragNum == Constants.IDX_PLM_PLAYLIST_FILES) {
             fragmentTransaction.replace(R.id.layout_playlist_manager, new Frag_plm_playlist_files(mContext, mPLM_DB), Constants.FRAG_PLM_PLAYLIST_FILES);
-            Constants.plm_state = Constants.IDX_PLM_PLAYLIST_FILES;
+            Constants.frag_plm_state = Constants.IDX_PLM_PLAYLIST_FILES;
             fragmentTransaction.addToBackStack(null);
         }
 

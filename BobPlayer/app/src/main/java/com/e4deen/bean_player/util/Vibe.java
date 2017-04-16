@@ -9,7 +9,7 @@ import android.os.Vibrator;
 public class Vibe {
 
     private static Vibrator vibe;
-    long[] vibePattern = {0, 60, 40};
+    static long[] vibePattern = {0, 60, 40};
 
     public static Vibe mVibe;
 
@@ -28,15 +28,20 @@ public class Vibe {
         vibe = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
     }
 
-    public void Vibe_Start() {
+    public static void Vibe_Create(Context context) {
+        vibe = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+        //mVibe =  new Vibe();
+    }
+
+    public static void Vibe_Start() {
         vibe.vibrate(vibePattern,0);
     }
 
-    public void Vibe_Stop() {
+    public static void Vibe_Stop() {
         vibe.cancel();
     }
 
-    public void vibration(int mSec) {
+    public static void vibration(int mSec) {
         vibe.vibrate(mSec);
     }
 

@@ -1,5 +1,8 @@
 package com.e4deen.bean_player.view.player_view.activity;
 
+import android.Manifest;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -27,6 +30,12 @@ import android.widget.TextView;
 
 
 import com.e4deen.bean_player.db.Playlist_manager_db;
+import com.e4deen.bean_player.view.file_explorer_view.activity.fragment.Frag_plm_filelist;
+import com.e4deen.bean_player.view.file_explorer_view.activity.fragment.Frag_plm_playlist;
+import com.e4deen.bean_player.view.file_explorer_view.activity.fragment.Frag_plm_playlist_files;
+import com.e4deen.bean_player.view.player_view.activity.fragment.Frag_main_filelist;
+import com.e4deen.bean_player.view.player_view.activity.fragment.Frag_main_script;
+import com.e4deen.bean_player.view.player_view.activity.fragment.Frag_main_shadowing;
 import com.e4deen.bean_player.view.player_view.component.CircleButton;
 import com.e4deen.bean_player.data.Constants;
 import com.e4deen.bean_player.view.file_explorer_view.activity.FileSearchActivity;
@@ -60,13 +69,10 @@ public class MainActivity extends AppCompatActivity {
     final int E_ERROR = 0;
 
     private AdView mAdView;
-    ListView listview_playList;
-    public Adapter_Main_PlayList mAdapterMainPlayList;
-    ImageButton btn_rew, btn_ff, btn_speed_dn, btn_speed_up, btn_bookmark_rew, btn_bookmark_ff, btn_set_repeat_period,
-            btn_set_bookmark, btn_file_search, btn_play_pause;
+
+    ImageButton btn_file_search, btn_play_pause;
     LongPressChecker mLongPressChecker;
     ArrayList<FileParcelable> fileListParcelable;
-    Vibe mVibe;
     Context mContext;
     MediaPlayerController mMediaPlayerController;
     SeekBar seekBar;
@@ -89,25 +95,18 @@ public class MainActivity extends AppCompatActivity {
                 .build();
         mAdView.loadAd(adRequest);
 //--------------------------------- Admob End ---------------------------------------------//
-//----------------------------- File List View Start --------------------------------------//
-        listview_playList = (ListView) findViewById(R.id.playList);
-        mAdapterMainPlayList = new Adapter_Main_PlayList();
-        mAdapterMainPlayList.resetItems();
-        listview_playList.setAdapter(mAdapterMainPlayList);
-//        playListViewInit();
-//----------------------------- File List View End --------------------------------------//
-//----------------------------- ETC Start --------------------------------------//
+//--------------------------------- ETC Start --------------------------------------//
         mContext = getApplicationContext();
         mMediaPlayerController = new MediaPlayerController(mContext);
 
-        btn_rew = (ImageButton) findViewById(R.id.btn_rew);
-        btn_ff = (ImageButton) findViewById(R.id.btn_ff);
-        btn_speed_dn = (ImageButton) findViewById(R.id.btn_speed_dn);
-        btn_speed_up = (ImageButton) findViewById(R.id.btn_speed_up);
-        btn_bookmark_rew = (ImageButton) findViewById(R.id.btn_bookmark_rew);
-        btn_bookmark_ff = (ImageButton) findViewById(R.id.btn_bookmark_ff);
-        btn_set_repeat_period = (ImageButton) findViewById(R.id.btn_set_repeat_period);
-        btn_set_bookmark = (ImageButton) findViewById(R.id.btn_set_bookmark);
+        findViewById(R.id.btn_rew).setOnTouchListener(mTouchEvent);
+        findViewById(R.id.btn_ff).setOnTouchListener(mTouchEvent);
+        findViewById(R.id.btn_speed_dn).setOnTouchListener(mTouchEvent);
+        findViewById(R.id.btn_speed_up).setOnTouchListener(mTouchEvent);
+        findViewById(R.id.btn_bookmark_rew).setOnTouchListener(mTouchEvent);
+        findViewById(R.id.btn_bookmark_ff).setOnTouchListener(mTouchEvent);
+        findViewById(R.id.btn_set_repeat_period).setOnTouchListener(mTouchEvent);
+        findViewById(R.id.btn_set_bookmark).setOnTouchListener(mTouchEvent);
 
         tv_elapsed_time = (TextView) findViewById(R.id.tv_elapsed_time);
         tv_total_duration = (TextView) findViewById(R.id.tv_total_duration);
@@ -115,14 +114,6 @@ public class MainActivity extends AppCompatActivity {
         tv_play_speed = (TextView) findViewById(R.id.tv_play_speed);
         tv_rew_ff_time = (TextView) findViewById(R.id.tv_rew_ff_time);
 
-        btn_rew.setOnTouchListener(mTouchEvent);
-        btn_ff.setOnTouchListener(mTouchEvent);
-        btn_speed_dn.setOnTouchListener(mTouchEvent);
-        btn_speed_up.setOnTouchListener(mTouchEvent);
-        btn_bookmark_rew.setOnTouchListener(mTouchEvent);
-        btn_bookmark_ff.setOnTouchListener(mTouchEvent);
-        btn_set_repeat_period.setOnTouchListener(mTouchEvent);
-        btn_set_bookmark.setOnTouchListener(mTouchEvent);
         mLongPressChecker = new LongPressChecker(this);
 //        mLongPressChecker.setOnLongPressListener(mOnLongPressListener);
 
@@ -130,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
         seekBar.setOnSeekBarChangeListener(mSeekBarChangeListner);
         seekBar.getThumb().mutate().setAlpha(0);
 
-        mVibe = new Vibe(mContext);
+        Vibe.Vibe_Create(this);
 
         mMediaPlayerController.setViews(seekBar, tv_elapsed_time, tv_total_duration, tv_play_speed);
         //playListViewInit();
@@ -142,7 +133,21 @@ public class MainActivity extends AppCompatActivity {
 
         mPLM_DB = new Playlist_manager_db(this);
         mPLM_DB.open();
-//----------------------------- ETC End --------------------------------------//
+//----------------------------- ETC End               ----------------------------------//
+//---------------------------- Fragment Setting Start ----------------------------------//
+        FragmentManager fm = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fm.beginTransaction();
+        fragmentTransaction.add(R.id.layout_main_tab, new Frag_main_filelist(mContext, mPLM_DB, mMediaPlayerController), Constants.FRAG_MAIN_TAB_FILELIST);
+        fragmentTransaction.commit();
+        fm.executePendingTransactions();
+        Constants.frag_main_tab_state = Constants.IDX_MAIN_TAB_FILELIST;
+
+        findViewById(R.id.iv_tab_file_list).setOnTouchListener(mTabTouchEvent);
+        findViewById(R.id.iv_tab_shadowing).setOnTouchListener(mTabTouchEvent);
+        findViewById(R.id.iv_tab_script).setOnTouchListener(mTabTouchEvent);
+
+        ((ImageView)findViewById(R.id.iv_tab_file_list)).setImageResource(R.drawable.tab_file_list_press);
+//---------------------------- Fragment Setting End   ----------------------------------//
     }
 
     /**
@@ -155,37 +160,7 @@ public class MainActivity extends AppCompatActivity {
             mAdView.resume();
         }
         Log.d(LOG_TAG, "MainActivity onResume()" );
-        playListViewInit();
-    }
 
-    int playListViewInit() {
-
-        Log.d(LOG_TAG, "playListViewInit ");
-        mAdapterMainPlayList.resetItems();
-
-        if(Constants.mCurrentPlaylistIdx > 0) {
-            int numOfItems = mPLM_DB.getNumOfItemsInPlaylist(Constants.mCurrentPlaylistIdx);
-            ArrayList<String> filelist = mPLM_DB.getFilelist(Constants.mCurrentPlaylistIdx);
-
-            for(int i = 0; i < numOfItems; i++ ) {
-                String filepath = filelist.get(i);
-                //Log.d(LOG_TAG, "playListViewInit fileName " + filepath);
-                int index = filepath.lastIndexOf("/");
-                String fileName = filepath.substring(index+1);
-                mAdapterMainPlayList.addItem(fileName);
-                //Log.d(LOG_TAG, "playListViewInit fileName " + fileName);
-            }
-
-            if(numOfItems > 0) {
-                mMediaPlayerController.setPlayFile(filelist.get(0));
-                mMediaPlayerController.setDuration();
-                Constants.FILE_READY_STATUS = Constants.FILE_READY;
-            }
-        }
-
-        listview_playList.setAdapter(mAdapterMainPlayList);
-
-        return E_SUCCESS;
     }
 
     @Override
@@ -218,33 +193,15 @@ public class MainActivity extends AppCompatActivity {
         CircleButton btn_Circle = new CircleButton(this, RL_Circle.getWidth(), RL_Circle.getHeight() );
         btn_Circle.setMediaPlayerController(mMediaPlayerController);
         RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-        //lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
         lp.addRule(RelativeLayout.CENTER_IN_PARENT);
         RL_Circle.addView(btn_Circle, lp);
 
-//        RL_Circle.addView(btn_TestCircle, lp);
-
-//----------center bar -----------------------------------
-        /*
-        ImageView iv_center_bar = new ImageView(this);
-        iv_center_bar.setId(R.id.iv_center_bar_id);
-        iv_center_bar.setImageResource(R.drawable.center_bar);
-
-        lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-        lp.addRule(RelativeLayout.CENTER_IN_PARENT);
-        lp.setMargins(0,0,0,0);
-        RL_Circle.addView(iv_center_bar, lp);
-        */
-//----------center circle -----------------------------------
         btn_play_pause = new ImageButton(this);
         btn_play_pause.setImageResource(R.drawable.btn_play);
-        //btn_play_pause.setImageResource(R.drawable.btn_pause);
         btn_play_pause.setId(R.id.btn_play_pause_id);
 
         btn_play_pause.setOnTouchListener(mTouchEvent);
         lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-        //lp.addRule(RelativeLayout.ABOVE, R.id.iv_center_bar_id );
-        //lp.addRule(RelativeLayout.CENTER_HORIZONTAL );
         lp.addRule(RelativeLayout.CENTER_IN_PARENT );
         lp.setMargins(0,0,0,0);
         btn_play_pause.setPadding(0,10,0,10);
@@ -294,9 +251,7 @@ public class MainActivity extends AppCompatActivity {
     View.OnTouchListener mTouchEvent = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
-            Log.d(LOG_TAG,"onTouch id " + v.getId() );
-            Log.d(LOG_TAG,"onTouch id log test " + R.id.btn_play_pause_id );
-
+            //Log.d(LOG_TAG,"onTouch id " + v.getId() );
 
             int action = event.getAction();
             int id = v.getId();
@@ -304,7 +259,7 @@ public class MainActivity extends AppCompatActivity {
 
 
             if (action == MotionEvent.ACTION_DOWN) {
-                mVibe.vibration(80);
+                Vibe.vibration(80);
             }
 
             switch (id) {
@@ -387,7 +342,7 @@ public class MainActivity extends AppCompatActivity {
                             break;
                     }
 
-
+/*
                     if(Constants.PLAYER_STATUS == Constants.PLAYER_STATUS_PLAY) {
                         btn_play_pause.setImageResource(R.drawable.btn_pause);
                         Constants.PLAYER_STATUS = Constants.PLAYER_STATUS_PAUSE;
@@ -395,7 +350,7 @@ public class MainActivity extends AppCompatActivity {
                         btn_play_pause.setImageResource(R.drawable.btn_play);
                         Constants.PLAYER_STATUS = Constants.PLAYER_STATUS_PLAY;
                     }
-
+*/
                     break;
 
 /*
@@ -538,6 +493,90 @@ public class MainActivity extends AppCompatActivity {
 
     };
 
+
+    View.OnTouchListener mTabTouchEvent = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+
+            int action = event.getAction();
+            int id = v.getId();
+
+            if (action == MotionEvent.ACTION_DOWN) {
+                Vibe.vibration(80);
+            }
+
+            switch (id) {
+                case R.id.iv_tab_file_list:
+                    switch (action) {
+                        case MotionEvent.ACTION_DOWN:
+                            main_tab_fragment_switch(Constants.IDX_MAIN_TAB_FILELIST);
+                            break;
+                        case MotionEvent.ACTION_UP:
+                            break;
+                    }
+                    break;
+                case R.id.iv_tab_shadowing:
+                    switch (action) {
+                        case MotionEvent.ACTION_DOWN:
+                            main_tab_fragment_switch(Constants.IDX_MAIN_TAB_SHADOWING);
+                            break;
+                        case MotionEvent.ACTION_UP:
+                            break;
+                    }
+                    break;
+                case R.id.iv_tab_script:
+                    switch (action) {
+                        case MotionEvent.ACTION_DOWN:
+                            main_tab_fragment_switch(Constants.IDX_MAIN_TAB_SCRIPT);
+                            break;
+                        case MotionEvent.ACTION_UP:
+                            break;
+                    }
+                    break;
+            }
+
+            return true;
+        }
+    };
+
+    public void main_tab_fragment_switch(int fragNum) {
+        FragmentManager fm = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fm.beginTransaction();
+
+        Log.d(LOG_TAG, "main_tab_fragment_switch fragNum " + fragNum);
+
+        if(fragNum == Constants.IDX_MAIN_TAB_FILELIST) {
+            ((ImageView)findViewById(R.id.iv_tab_file_list)).setImageResource(R.drawable.tab_file_list_press);
+            ((ImageView)findViewById(R.id.iv_tab_shadowing)).setImageResource(R.drawable.tab_shadowing_release);
+            ((ImageView)findViewById(R.id.iv_tab_script)).setImageResource(R.drawable.tab_script_release);
+
+            fragmentTransaction.replace(R.id.layout_main_tab, new Frag_main_filelist(mContext, mPLM_DB, mMediaPlayerController), Constants.FRAG_MAIN_TAB_FILELIST);
+            fragmentTransaction.addToBackStack(null);
+            Constants.frag_main_tab_state = Constants.IDX_MAIN_TAB_FILELIST;
+        } else if(fragNum == Constants.IDX_MAIN_TAB_SHADOWING) {
+            ((ImageView)findViewById(R.id.iv_tab_file_list)).setImageResource(R.drawable.tab_file_list_release);
+            ((ImageView)findViewById(R.id.iv_tab_shadowing)).setImageResource(R.drawable.tab_shadowing_press);
+            ((ImageView)findViewById(R.id.iv_tab_script)).setImageResource(R.drawable.tab_script_release);
+
+            fragmentTransaction.replace(R.id.layout_main_tab, new Frag_main_shadowing(mContext, mPLM_DB, mMediaPlayerController), Constants.FRAG_MAIN_TAB_SHADOWING);
+            Constants.frag_main_tab_state = Constants.IDX_MAIN_TAB_SHADOWING;
+            fragmentTransaction.addToBackStack(null);
+        } else if(fragNum == Constants.IDX_MAIN_TAB_SCRIPT) {
+            ((ImageView)findViewById(R.id.iv_tab_file_list)).setImageResource(R.drawable.tab_file_list_release);
+            ((ImageView)findViewById(R.id.iv_tab_shadowing)).setImageResource(R.drawable.tab_shadowing_release);
+            ((ImageView)findViewById(R.id.iv_tab_script)).setImageResource(R.drawable.tab_script_press);
+
+            fragmentTransaction.replace(R.id.layout_main_tab, new Frag_main_script(mContext, mPLM_DB, mMediaPlayerController), Constants.FRAG_MAIN_TAB_SCRIPT);
+            Constants.frag_main_tab_state = Constants.IDX_MAIN_TAB_SCRIPT;
+            fragmentTransaction.addToBackStack(null);
+        }
+
+        fragmentTransaction.commit();
+        fm.executePendingTransactions();
+    }
+
+
+
     public void rewBookmark() {
 /*
         if(repeatEnable == true) {
@@ -567,6 +606,8 @@ public class MainActivity extends AppCompatActivity {
         }
         return;
     }
+
+
 
     public void ffBookmark() {
 /*
@@ -713,6 +754,7 @@ public class MainActivity extends AppCompatActivity {
     }
 */
 
+/*
     int playListViewUpdate(ArrayList<FileParcelable> filelist) {
 
         if ( filelist.size() == 0 ) {
@@ -738,7 +780,7 @@ public class MainActivity extends AppCompatActivity {
 
         return E_SUCCESS;
     }
-
+*/
 
 /*
     LongPressChecker.OnLongPressListener mOnLongPressListener =  new LongPressChecker.OnLongPressListener() {
@@ -799,10 +841,14 @@ public class MainActivity extends AppCompatActivity {
     void getPermission() {
         int permissionCheck1 = ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
         int permissionCheck2 = ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE);
-        if (permissionCheck1 != PackageManager.PERMISSION_GRANTED || permissionCheck2 != PackageManager.PERMISSION_GRANTED) {
+        int permissionCheck3 = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO);
+
+        if (permissionCheck1 != PackageManager.PERMISSION_GRANTED || permissionCheck2 != PackageManager.PERMISSION_GRANTED ||
+                permissionCheck3 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
                     new String[]{ android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                            android.Manifest.permission.READ_EXTERNAL_STORAGE},
+                            android.Manifest.permission.READ_EXTERNAL_STORAGE,
+                            android.Manifest.permission.RECORD_AUDIO},
                     0);
         }
     }

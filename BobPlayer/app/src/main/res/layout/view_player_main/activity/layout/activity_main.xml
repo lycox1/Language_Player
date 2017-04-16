@@ -21,25 +21,58 @@
         android:weightSum="1">
 
         <LinearLayout
-            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_weight="0.427"
-            android:layout_height="0dp">
+            android:layout_height="0dp"
+            android:layout_weight="0.5"
+            android:orientation="vertical"
+            android:weightSum="1">
 
-            <ListView
-                android:layout_width="wrap_content"
-                android:layout_height="fill_parent"
-                android:id="@+id/playList"
-                android:background="@drawable/border"
-                />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="0.18"
+                android:orientation="horizontal"
+                android:weightSum="1">
 
+                <ImageView
+                    android:id="@+id/iv_tab_file_list"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.33"
+                    android:scaleType="fitXY"
+                    ads:srcCompat="@drawable/tab_file_list_release"/>
+
+                <ImageView
+                    android:id="@+id/iv_tab_shadowing"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.33"
+                    android:scaleType="fitXY"
+                    ads:srcCompat="@drawable/tab_shadowing_release"/>
+
+                <ImageView
+                    android:id="@+id/iv_tab_script"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.33"
+                    android:scaleType="fitXY"
+                    ads:srcCompat="@drawable/tab_script_release"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layout_main_tab"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="0.82"
+                android:orientation="vertical">
+            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout
-            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_weight="0.573"
             android:layout_height="0dp"
+            android:layout_weight="0.5"
+            android:orientation="vertical"
             android:weightSum="1">
 
             <LinearLayout
@@ -61,10 +94,10 @@
                         android:id="@+id/seekbar"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:minHeight="40dp"
-                        android:maxHeight="40dp"
                         android:layout_centerVertical="false"
                         android:max="10"
+                        android:maxHeight="40dp"
+                        android:minHeight="40dp"
                         android:padding="0dp"
                         android:paddingBottom="0dp"
                         android:paddingEnd="0dp"
@@ -73,8 +106,8 @@
                         android:paddingStart="0dp"
                         android:paddingTop="0dp"
                         android:progress="5"
-                        android:progressDrawable="@drawable/seekbar_style"
-                        android:thumb="@drawable/seekbar_style_thumb"
+                        android:progressDrawable="@drawable/player_seekbar_style"
+                        android:thumb="@drawable/player_seekbar_style_thumb"
                         />
 
                     <TextView
@@ -127,7 +160,7 @@
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="0.55">
+                        android:layout_weight="0.65">
 
                         <ImageButton
                             android:id="@+id/btn_speed_up"
@@ -266,7 +299,7 @@
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="0.45">
+                        android:layout_weight="0.35">
 
                         <ImageButton
                             android:id="@+id/btn_rew"
@@ -328,7 +361,7 @@
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="0.55">
+                        android:layout_weight="0.65">
 
                         <ImageButton
                             android:id="@+id/btn_set_repeat_period"
@@ -363,7 +396,7 @@
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="0.45">
+                        android:layout_weight="0.35">
 
                         <ImageButton
                             android:id="@+id/btn_bookmark_rew"

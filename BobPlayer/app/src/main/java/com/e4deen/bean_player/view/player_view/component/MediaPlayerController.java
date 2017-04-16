@@ -48,6 +48,12 @@ public class MediaPlayerController {
     static final int COMMAND_UPDATE_SEEKTO = 14;
     static final int COMMAND_SET_REPEAT = 15;
     static final int COMMAND_UPDATE_PLAYBACK_SPEED = 16;
+    static final int COMMAND_START_LOOPBACK = 17;
+    static final int COMMAND_STOP_LOOPBACK = 18;
+    static final int COMMAND_SET_LEFT_LOOPBACK_VOL = 19;
+    static final int COMMAND_SET_RIGHT_LOOPBACK_VOL = 20;
+    static final int COMMAND_SET_LEFT_PLAYING_FILE_VOL = 21;
+    static final int COMMAND_SET_RIGHT_PLAYING_FILE_VOL = 22;
 
     static final int COMMAND_DISCONNECT = 99;
 
@@ -248,6 +254,49 @@ public class MediaPlayerController {
     public int setRepeat() {
         Log.d(LOG_TAG, "setRepeat ");
         sendMessage(COMMAND_SET_REPEAT);
+
+        return E_SUCCESS;
+    }
+
+    public int startLoopback() {
+        Log.d(LOG_TAG, "startLoopback ");
+        sendMessage(COMMAND_START_LOOPBACK);
+
+        return E_SUCCESS;
+    }
+
+    public int stopLoopback() {
+        Log.d(LOG_TAG, "stopLoopback ");
+        sendMessage(COMMAND_STOP_LOOPBACK);
+
+        return E_SUCCESS;
+    }
+
+    public int setLoopbackLeftVol(int vol) {
+        Log.d(LOG_TAG, "setLoopbackLeftVol " + vol);
+        sendMessage(COMMAND_SET_LEFT_LOOPBACK_VOL, Integer.toString(vol));
+
+        return E_SUCCESS;
+    }
+
+    public int setLoopbackRightVol(int vol) {
+        Log.d(LOG_TAG, "setLoopbackRightVol " + vol);
+        sendMessage(COMMAND_SET_RIGHT_LOOPBACK_VOL, Integer.toString(vol));
+
+        return E_SUCCESS;
+    }
+
+
+    public int setPlayingFileLeftVol(int vol) {
+        Log.d(LOG_TAG, "setPlayingFileLeftVol " + vol);
+        sendMessage(COMMAND_SET_LEFT_PLAYING_FILE_VOL, Integer.toString(vol));
+
+        return E_SUCCESS;
+    }
+
+    public int setPlayingFileRightVol(int vol) {
+        Log.d(LOG_TAG, "setPlayingFileRightVol " + vol);
+        sendMessage(COMMAND_SET_RIGHT_PLAYING_FILE_VOL, Integer.toString(vol));
 
         return E_SUCCESS;
     }

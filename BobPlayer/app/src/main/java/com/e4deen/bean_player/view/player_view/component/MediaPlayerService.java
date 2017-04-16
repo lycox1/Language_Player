@@ -22,16 +22,19 @@ import java.text.DecimalFormat;
  */
 public class MediaPlayerService extends Service {
 
-    static String LOG_TAG = "Jog_Player_MediaPlayerService";
+    static String LOG_TAG = "Bean_Player_MediaPlayerService";
     final int E_SUCCESS = 1;
     final int E_ERROR = 0;
     String playFile = null;
     int mDuration = 0;
     float mPlaybackSpeed = 1.0f;
-
+    float mLeftVol = 1.0f;
+    float mRightVol = 1.0f;
     MediaPlayer mediaPlayer = null;
     private Messenger mRemote;
     DecimalFormat format_PlaybackSpeed;
+
+    LoopbackPlayer mLoopbackPlayer;
 
     @Override
     public void onCreate() {
@@ -41,6 +44,7 @@ public class MediaPlayerService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         playerInit();
+        Log.d(LOG_TAG, "Test mLeftVol " + mLeftVol + ", mRightVol " + mRightVol);
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -75,7 +79,7 @@ public class MediaPlayerService extends Service {
         @Override
         public void handleMessage(Message msg) {
 
-         //   Log.d(LOG_TAG, "handleMessage msg.what : " + msg.what);
+            Log.d(LOG_TAG, "handleMessage msg.what : " + msg.what);
 
             switch (msg.what) {
                 case MediaPlayerController.COMMAND_CONNECT:  // 0
@@ -173,14 +177,50 @@ public class MediaPlayerService extends Service {
                         SeekTo(Integer.parseInt(progress));
                     }
                     break;
-                case MediaPlayerController.COMMAND_SET_REPEAT:      // 14
+                case MediaPlayerController.COMMAND_SET_REPEAT:      // 15
                     if(Constants.FILE_READY_STATUS == Constants.FILE_READY) {
                         setRepeat();
                     }
                     break;
+
+                case MediaPlayerController.COMMAND_START_LOOPBACK:      // 17
+                    Log.d(LOG_TAG, "handleMessage COMMAND_START_LOOPBACK");
+                    startLoopback();
+                    break;
+
+                case MediaPlayerController.COMMAND_STOP_LOOPBACK:      // 18
+                    Log.d(LOG_TAG, "handleMessage COMMAND_STOP_LOOPBACK");
+                    stopLoopback();
+                    break;
+
+                case MediaPlayerController.COMMAND_SET_LEFT_LOOPBACK_VOL:      // 19
+                    Log.d(LOG_TAG, "handleMessage COMMAND_SET_LEFT_LOOPBACK_VOL");
+                    String vol = ((String)msg.obj);
+                    setLoopbackLeftVol(Integer.parseInt(vol));
+                    break;
+
+                case MediaPlayerController.COMMAND_SET_RIGHT_LOOPBACK_VOL:      // 20
+                    Log.d(LOG_TAG, "handleMessage COMMAND_SET_RIGHT_LOOPBACK_VOL");
+                    vol = ((String)msg.obj);
+                    setLoopbackRightVol(Integer.parseInt(vol));
+                    break;
+
+                case MediaPlayerController.COMMAND_SET_LEFT_PLAYING_FILE_VOL:      // 21
+                    Log.d(LOG_TAG, "handleMessage COMMAND_SET_LEFT_PLAYING_FILE_VOL");
+                    vol = ((String)msg.obj);
+                    setPlayingFileLeftVol(Integer.parseInt(vol));
+                    break;
+
+                case MediaPlayerController.COMMAND_SET_RIGHT_PLAYING_FILE_VOL:      // 22
+                    Log.d(LOG_TAG, "handleMessage COMMAND_SET_RIGHT_PLAYING_FILE_VOL");
+                    vol = ((String)msg.obj);
+                    setPlayingFileRightVol(Integer.parseInt(vol));
+                    break;
+
                 case MediaPlayerController.COMMAND_DISCONNECT:      // 99
                     Log.d(LOG_TAG, "handleMessage COMMAND_DISCONNECT");
                     break;
+
                 default :
                     remoteSendMessage(0, "TEST");
                     break;
@@ -201,6 +241,8 @@ public class MediaPlayerService extends Service {
                 stopSelf();
             }
         });
+
+        mLoopbackPlayer = new LoopbackPlayer();
 
         return E_SUCCESS;
     }
@@ -245,9 +287,10 @@ public class MediaPlayerService extends Service {
     }
 
     public int startPlay() throws IOException {
-        Log.d(LOG_TAG, "startPlay");
+        Log.d(LOG_TAG, "startPlay mLeftVol " + mLeftVol + ", mRightVol " + mRightVol);
         mediaPlayer.setPlaybackParams(mediaPlayer.getPlaybackParams().setSpeed(mPlaybackSpeed));
         mediaPlayer.start();
+        mediaPlayer.setVolume(mLeftVol, mRightVol);
 
         return E_SUCCESS;
     }
@@ -321,6 +364,7 @@ public class MediaPlayerService extends Service {
                 Constants.REPEAT_STATE = Constants.REPEAT;
                 mediaPlayer.setLooping(true);
 
+
                 if (Constants.SHUFFLE_STATE == Constants.SHUFFLE) {
                     Constants.SHUFFLE_STATE = Constants.NOT_SUFFLE;
                 }
@@ -353,4 +397,51 @@ public class MediaPlayerService extends Service {
 
         return E_SUCCESS;
     }
+
+    public int startLoopback() {
+        mLoopbackPlayer.Start();
+        return E_SUCCESS;
+    }
+
+    public int stopLoopback() {
+        Log.d(LOG_TAG,"stopLoopback ");
+        mLoopbackPlayer.Stop();
+
+        return E_SUCCESS;
+    }
+
+    public int setLoopbackLeftVol(int vol) {
+        Log.d(LOG_TAG,"setLoopbackLeftVol " + vol);
+        mLoopbackPlayer.setLeftVol(vol);
+
+        return E_SUCCESS;
+    }
+    public int setLoopbackRightVol(int vol) {
+        Log.d(LOG_TAG,"setLoopbackRightVol " + vol);
+        mLoopbackPlayer.setRightVol(vol);
+
+        return E_SUCCESS;
+    }
+    public int setPlayingFileLeftVol(float vol) {
+
+        mLeftVol = (float)(vol/10);
+
+        if(Constants.PLAYER_STATUS == Constants.PLAYER_STATUS_PLAY) {
+            Log.d(LOG_TAG,"setPlayingFileLeftVol vol " + vol + ", mLeftVol " + mLeftVol + ", mRightVol " + mRightVol);
+            mediaPlayer.setVolume(mLeftVol, mRightVol);
+        }
+
+        return E_SUCCESS;
+    }
+    public int setPlayingFileRightVol(float vol) {
+
+        mRightVol = (float)(vol/10);
+
+        if(Constants.PLAYER_STATUS == Constants.PLAYER_STATUS_PLAY) {
+            Log.d(LOG_TAG,"setPlayingFileRightVol " + vol + ", mLeftVol " + mLeftVol + ", mRightVol " + mRightVol);
+            mediaPlayer.setVolume(mLeftVol, mRightVol);
+        }
+        return E_SUCCESS;
+    }
+
 }
