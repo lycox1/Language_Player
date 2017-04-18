@@ -13,6 +13,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.e4deen.bean_player.data.Constants;
+import com.e4deen.bean_player.util.VolumeUtil;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -30,10 +31,13 @@ public class MediaPlayerService extends Service {
     float mPlaybackSpeed = 1.0f;
     float mLeftVol = 1.0f;
     float mRightVol = 1.0f;
+    int mLeftVolIdx = 10;
+    int mRightVolIndex = 10;
+    int mMasterVolIndex = 10;
     MediaPlayer mediaPlayer = null;
     private Messenger mRemote;
     DecimalFormat format_PlaybackSpeed;
-
+    VolumeUtil mVolumeUtil;
     LoopbackPlayer mLoopbackPlayer;
 
     @Override
@@ -45,6 +49,7 @@ public class MediaPlayerService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         playerInit();
         Log.d(LOG_TAG, "Test mLeftVol " + mLeftVol + ", mRightVol " + mRightVol);
+        mVolumeUtil = new VolumeUtil();
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -215,6 +220,18 @@ public class MediaPlayerService extends Service {
                     Log.d(LOG_TAG, "handleMessage COMMAND_SET_RIGHT_PLAYING_FILE_VOL");
                     vol = ((String)msg.obj);
                     setPlayingFileRightVol(Integer.parseInt(vol));
+                    break;
+
+                case MediaPlayerController.COMMAND_SET_LOOPBACK_MASTER_VOL:      // 23
+                    Log.d(LOG_TAG, "handleMessage COMMAND_SET_LOOPBACK_MASTER_VOL");
+                    vol = ((String)msg.obj);
+                    setLoopbackMasterVol(Integer.parseInt(vol));
+                    break;
+
+                case MediaPlayerController.COMMNAD_SET_PLAYING_FILE_MASTER_VOL:      // 24
+                    Log.d(LOG_TAG, "handleMessage COMMNAD_SET_PLAYING_FILE_MASTER_VOL");
+                    vol = ((String)msg.obj);
+                    setPlayingFileMasterVol(Integer.parseInt(vol));
                     break;
 
                 case MediaPlayerController.COMMAND_DISCONNECT:      // 99
@@ -422,9 +439,10 @@ public class MediaPlayerService extends Service {
 
         return E_SUCCESS;
     }
-    public int setPlayingFileLeftVol(float vol) {
+    public int setPlayingFileLeftVol(int vol) {
 
-        mLeftVol = (float)(vol/10);
+        mLeftVolIdx = vol;
+        mLeftVol = mVolumeUtil.getVolume(vol);
 
         if(Constants.PLAYER_STATUS == Constants.PLAYER_STATUS_PLAY) {
             Log.d(LOG_TAG,"setPlayingFileLeftVol vol " + vol + ", mLeftVol " + mLeftVol + ", mRightVol " + mRightVol);
@@ -433,9 +451,10 @@ public class MediaPlayerService extends Service {
 
         return E_SUCCESS;
     }
-    public int setPlayingFileRightVol(float vol) {
+    public int setPlayingFileRightVol(int vol) {
 
-        mRightVol = (float)(vol/10);
+        mRightVolIndex = vol;
+        mRightVol = mVolumeUtil.getVolume(vol);
 
         if(Constants.PLAYER_STATUS == Constants.PLAYER_STATUS_PLAY) {
             Log.d(LOG_TAG,"setPlayingFileRightVol " + vol + ", mLeftVol " + mLeftVol + ", mRightVol " + mRightVol);
@@ -443,5 +462,28 @@ public class MediaPlayerService extends Service {
         }
         return E_SUCCESS;
     }
+
+    public int setLoopbackMasterVol(int vol) {
+        Log.d(LOG_TAG,"setLoopbackMasterVol " + vol);
+        mLoopbackPlayer.setLoopbackMasterVol(vol);
+
+        return E_SUCCESS;
+    }
+
+    public int setPlayingFileMasterVol(int vol) {
+
+        mMasterVolIndex = vol;
+        mVolumeUtil.setmMasterVolume(mMasterVolIndex);
+
+        mRightVol = mVolumeUtil.getVolume(mRightVolIndex);
+        mLeftVol = mVolumeUtil.getVolume(mLeftVolIdx);
+
+        if(Constants.PLAYER_STATUS == Constants.PLAYER_STATUS_PLAY) {
+            Log.d(LOG_TAG,"setPlayingFileMasterVol " + vol + ", mRightVol " + mRightVol + ", mLeftVol " + mLeftVol);
+            mediaPlayer.setVolume(mLeftVol, mRightVol);
+        }
+        return E_SUCCESS;
+    }
+
 
 }

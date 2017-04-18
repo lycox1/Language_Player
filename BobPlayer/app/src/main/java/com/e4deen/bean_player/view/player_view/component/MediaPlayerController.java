@@ -54,6 +54,8 @@ public class MediaPlayerController {
     static final int COMMAND_SET_RIGHT_LOOPBACK_VOL = 20;
     static final int COMMAND_SET_LEFT_PLAYING_FILE_VOL = 21;
     static final int COMMAND_SET_RIGHT_PLAYING_FILE_VOL = 22;
+    static final int COMMAND_SET_LOOPBACK_MASTER_VOL = 23;
+    static final int COMMNAD_SET_PLAYING_FILE_MASTER_VOL = 24;
 
     static final int COMMAND_DISCONNECT = 99;
 
@@ -297,6 +299,20 @@ public class MediaPlayerController {
     public int setPlayingFileRightVol(int vol) {
         Log.d(LOG_TAG, "setPlayingFileRightVol " + vol);
         sendMessage(COMMAND_SET_RIGHT_PLAYING_FILE_VOL, Integer.toString(vol));
+
+        return E_SUCCESS;
+    }
+
+    public int setLoopbackMasterVol(int vol) {
+        Log.d(LOG_TAG, "setLoopbackMasterVol " + vol);
+        sendMessage(COMMAND_SET_LOOPBACK_MASTER_VOL, Integer.toString(vol));
+
+        return E_SUCCESS;
+    }
+
+    public int setPlayingFileMasterVol(int vol) {
+        Log.d(LOG_TAG, "setLoopbackMasterVol " + vol);
+        sendMessage(COMMNAD_SET_PLAYING_FILE_MASTER_VOL, Integer.toString(vol));
 
         return E_SUCCESS;
     }

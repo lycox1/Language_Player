@@ -66,4 +66,8 @@ public class Constants {
     public static int frag_main_tab_state = IDX_MAIN_TAB_FILELIST;
     public static int SHADOWING_MY_VOICE_ONOFF_STATE = STATE_OFF;
     public static int SHADOWING_PLAYING_FILE_ONOFF_STATE = STATE_ON;
+
+
+
+
 }

@@ -15,7 +15,9 @@ import android.widget.SeekBar;
 import com.e4deen.bean_player.R;
 import com.e4deen.bean_player.data.Constants;
 import com.e4deen.bean_player.db.Playlist_manager_db;
+import com.e4deen.bean_player.util.VerticalSeekBar;
 import com.e4deen.bean_player.util.Vibe;
+import com.e4deen.bean_player.util.VolumeUtil;
 import com.e4deen.bean_player.view.player_view.component.LoopbackPlayer;
 import com.e4deen.bean_player.view.player_view.component.MediaPlayerController;
 
@@ -32,6 +34,7 @@ public class Frag_main_shadowing extends Fragment {
     ImageButton mBtnMyVoiceOnOff, mBtnPlayingFileOnOff;
     ImageView mIvMyVoice, mIvPlayingFile;
     SeekBar mSeekbarMyVoice, mSeekbarPlayingFile;
+    VerticalSeekBar mSeekbarMyVoiceMaster, mSeekbarPlayingFileMaster;
     int mLeftVolume = 10;
     int mRightVolume = 10;
 
@@ -58,8 +61,13 @@ public class Frag_main_shadowing extends Fragment {
 
         mSeekbarMyVoice = (SeekBar) rootView.findViewById(R.id.seekbar_shadowing_my_voice);
         mSeekbarPlayingFile = (SeekBar) rootView.findViewById(R.id.seekbar_shadowing_playing_file);
-        mSeekbarMyVoice.setOnSeekBarChangeListener(mSeekBarListenerMyVoice);
-        mSeekbarPlayingFile.setOnSeekBarChangeListener(mSeekBarListenerPlayingFile);
+        mSeekbarMyVoiceMaster = (VerticalSeekBar) rootView.findViewById(R.id.seekbarMyVoiceMaster);
+        mSeekbarPlayingFileMaster = (VerticalSeekBar) rootView.findViewById(R.id.seekbarPlayingFileMaster);
+
+        mSeekbarMyVoice.setOnSeekBarChangeListener(mSeekBarListenerMyVoiceBalance);
+        mSeekbarPlayingFile.setOnSeekBarChangeListener(mSeekBarListenerPlayingFileBalance);
+        mSeekbarMyVoiceMaster.setOnSeekBarChangeListener(mSeekBarListenerMyVoiceMaster);
+        mSeekbarPlayingFileMaster.setOnSeekBarChangeListener(mSeekBarListenerPlayingFileMaster);
 
         return rootView;
     }
@@ -101,8 +109,9 @@ public class Frag_main_shadowing extends Fragment {
                         mIvPlayingFile.setImageResource(R.drawable.iv_playing_file_on);
 
                         if(Constants.PLAYER_STATUS == Constants.PLAYER_STATUS_PLAY) {
-                            mMediaPlayerController.setPlayingFileLeftVol(mLeftVolume);
+                            Log.d(LOG_TAG, "playingFile switch ON mRightVolume " + mRightVolume + ", mLeftVolume " + mLeftVolume);
                             mMediaPlayerController.setPlayingFileRightVol(mRightVolume);
+                            mMediaPlayerController.setPlayingFileLeftVol(mLeftVolume);
                         }
                     } else {
                         Constants.SHADOWING_PLAYING_FILE_ONOFF_STATE = Constants.STATE_OFF;
@@ -110,8 +119,10 @@ public class Frag_main_shadowing extends Fragment {
                         mIvPlayingFile.setImageResource(R.drawable.iv_playing_file_off);
 
                         if(Constants.PLAYER_STATUS == Constants.PLAYER_STATUS_PLAY) {
-                            mMediaPlayerController.setPlayingFileLeftVol(0);
-                            mMediaPlayerController.setPlayingFileRightVol(0);
+                            Log.d(LOG_TAG, "playingFile switch OFF mRightVolume " + mRightVolume + ", mLeftVolume " + mLeftVolume);
+                            //mMediaPlayerController.setPlayingFileMasterVol(VolumeUtil.MIN_VOLUME_IDX);
+                            mMediaPlayerController.setPlayingFileLeftVol(VolumeUtil.MIN_VOLUME_IDX);
+                            mMediaPlayerController.setPlayingFileRightVol(VolumeUtil.MIN_VOLUME_IDX);
                         }
                     }
                     break;
@@ -119,7 +130,7 @@ public class Frag_main_shadowing extends Fragment {
         }
     };
 
-    SeekBar.OnSeekBarChangeListener mSeekBarListenerMyVoice = new SeekBar.OnSeekBarChangeListener() {
+    SeekBar.OnSeekBarChangeListener mSeekBarListenerMyVoiceBalance = new SeekBar.OnSeekBarChangeListener() {
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) { }
         @Override
@@ -132,14 +143,14 @@ public class Frag_main_shadowing extends Fragment {
 
                 if(Constants.SHADOWING_MY_VOICE_ONOFF_STATE == Constants.STATE_ON) {
                     if(progress < 10) {
-                        mMediaPlayerController.setLoopbackLeftVol(LoopbackPlayer.MAX_VOLUME);
+                        mMediaPlayerController.setLoopbackLeftVol(VolumeUtil.MAX_VOLUME_IDX);
                         mMediaPlayerController.setLoopbackRightVol(progress);
                     } else if (progress > 10) {
-                        mMediaPlayerController.setLoopbackLeftVol(LoopbackPlayer.MAX_VOLUME - (progress - LoopbackPlayer.MAX_VOLUME));
-                        mMediaPlayerController.setLoopbackRightVol(LoopbackPlayer.MAX_VOLUME);
+                        mMediaPlayerController.setLoopbackLeftVol(VolumeUtil.MAX_VOLUME_IDX - (progress - VolumeUtil.MAX_VOLUME_IDX));
+                        mMediaPlayerController.setLoopbackRightVol(VolumeUtil.MAX_VOLUME_IDX);
                     } else {
-                        mMediaPlayerController.setLoopbackLeftVol(LoopbackPlayer.MAX_VOLUME);
-                        mMediaPlayerController.setLoopbackRightVol(LoopbackPlayer.MAX_VOLUME);
+                        mMediaPlayerController.setLoopbackLeftVol(VolumeUtil.MAX_VOLUME_IDX);
+                        mMediaPlayerController.setLoopbackRightVol(VolumeUtil.MAX_VOLUME_IDX);
                     }
                 }
 
@@ -147,7 +158,7 @@ public class Frag_main_shadowing extends Fragment {
         }
     };
 
-    SeekBar.OnSeekBarChangeListener mSeekBarListenerPlayingFile = new SeekBar.OnSeekBarChangeListener() {
+    SeekBar.OnSeekBarChangeListener mSeekBarListenerPlayingFileBalance = new SeekBar.OnSeekBarChangeListener() {
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) { }
         @Override
@@ -160,21 +171,53 @@ public class Frag_main_shadowing extends Fragment {
 
                 if(Constants.SHADOWING_PLAYING_FILE_ONOFF_STATE == Constants.STATE_ON) {
                     if(progress < 10) {
-                        mLeftVolume = LoopbackPlayer.MAX_VOLUME;
+                        mLeftVolume = VolumeUtil.MAX_VOLUME_IDX;
                         mRightVolume = progress;
                     } else if (progress > 10) {
-                        mLeftVolume = LoopbackPlayer.MAX_VOLUME - (progress - LoopbackPlayer.MAX_VOLUME);
-                        mRightVolume = LoopbackPlayer.MAX_VOLUME;
+                        mLeftVolume = VolumeUtil.MAX_VOLUME_IDX - (progress - VolumeUtil.MAX_VOLUME_IDX);
+                        mRightVolume = VolumeUtil.MAX_VOLUME_IDX;
                     } else {
-                        mLeftVolume = LoopbackPlayer.MAX_VOLUME;
-                        mRightVolume = LoopbackPlayer.MAX_VOLUME;
+                        mLeftVolume = VolumeUtil.MAX_VOLUME_IDX;
+                        mRightVolume = VolumeUtil.MAX_VOLUME_IDX;
                     }
 
                     mMediaPlayerController.setPlayingFileLeftVol(mLeftVolume);
                     mMediaPlayerController.setPlayingFileRightVol(mRightVolume);
                 }
-
             }
         }
     };
+
+    SeekBar.OnSeekBarChangeListener mSeekBarListenerMyVoiceMaster = new SeekBar.OnSeekBarChangeListener() {
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) { }
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+        };
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            Log.d(LOG_TAG, "onProgressChanged mSeekBarListenerMyVoiceMaster fromUser " + fromUser + ", progress " + progress);
+            if(fromUser) {
+                Log.d(LOG_TAG, "onProgressChanged Constants.PLAYER_STATUS " + Constants.PLAYER_STATUS );
+                mMediaPlayerController.setLoopbackMasterVol(progress);
+            }
+        }
+    };
+
+    SeekBar.OnSeekBarChangeListener mSeekBarListenerPlayingFileMaster = new SeekBar.OnSeekBarChangeListener() {
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) { }
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) { }
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            Log.d(LOG_TAG, "onProgressChanged mSeekBarListenerPlayingFileMaster fromUser " + fromUser + ", progress " + progress);
+            if(fromUser) {
+                Log.d(LOG_TAG, "onProgressChanged Constants.PLAYER_STATUS " + Constants.PLAYER_STATUS );
+                mMediaPlayerController.setPlayingFileMasterVol(progress);
+            }
+        }
+    };
+
+
 }

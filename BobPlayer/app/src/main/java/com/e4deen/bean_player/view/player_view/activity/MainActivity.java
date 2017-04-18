@@ -551,7 +551,7 @@ public class MainActivity extends AppCompatActivity {
             ((ImageView)findViewById(R.id.iv_tab_script)).setImageResource(R.drawable.tab_script_release);
 
             fragmentTransaction.replace(R.id.layout_main_tab, new Frag_main_filelist(mContext, mPLM_DB, mMediaPlayerController), Constants.FRAG_MAIN_TAB_FILELIST);
-            fragmentTransaction.addToBackStack(null);
+            //fragmentTransaction.addToBackStack(null);
             Constants.frag_main_tab_state = Constants.IDX_MAIN_TAB_FILELIST;
         } else if(fragNum == Constants.IDX_MAIN_TAB_SHADOWING) {
             ((ImageView)findViewById(R.id.iv_tab_file_list)).setImageResource(R.drawable.tab_file_list_release);
@@ -560,7 +560,7 @@ public class MainActivity extends AppCompatActivity {
 
             fragmentTransaction.replace(R.id.layout_main_tab, new Frag_main_shadowing(mContext, mPLM_DB, mMediaPlayerController), Constants.FRAG_MAIN_TAB_SHADOWING);
             Constants.frag_main_tab_state = Constants.IDX_MAIN_TAB_SHADOWING;
-            fragmentTransaction.addToBackStack(null);
+            //fragmentTransaction.addToBackStack(null);
         } else if(fragNum == Constants.IDX_MAIN_TAB_SCRIPT) {
             ((ImageView)findViewById(R.id.iv_tab_file_list)).setImageResource(R.drawable.tab_file_list_release);
             ((ImageView)findViewById(R.id.iv_tab_shadowing)).setImageResource(R.drawable.tab_shadowing_release);
@@ -568,7 +568,7 @@ public class MainActivity extends AppCompatActivity {
 
             fragmentTransaction.replace(R.id.layout_main_tab, new Frag_main_script(mContext, mPLM_DB, mMediaPlayerController), Constants.FRAG_MAIN_TAB_SCRIPT);
             Constants.frag_main_tab_state = Constants.IDX_MAIN_TAB_SCRIPT;
-            fragmentTransaction.addToBackStack(null);
+            //fragmentTransaction.addToBackStack(null);
         }
 
         fragmentTransaction.commit();
