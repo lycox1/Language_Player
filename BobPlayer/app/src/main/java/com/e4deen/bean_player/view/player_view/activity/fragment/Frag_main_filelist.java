@@ -1,28 +1,28 @@
 package com.e4deen.bean_player.view.player_view.activity.fragment;
 
-import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.graphics.Color;
-import android.graphics.Paint;
+import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.e4deen.bean_player.R;
 import com.e4deen.bean_player.data.Constants;
-import com.e4deen.bean_player.data.FileUtility;
+import com.e4deen.bean_player.db.DataBases;
 import com.e4deen.bean_player.db.Playlist_manager_db;
+import com.e4deen.bean_player.util.Valueable_Util;
+import com.e4deen.bean_player.view.player_view.activity.MainActivity;
 import com.e4deen.bean_player.view.player_view.adapter.Adapter_Main_PlayList;
 import com.e4deen.bean_player.view.player_view.component.MediaPlayerController;
 
-import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -33,16 +33,44 @@ public class Frag_main_filelist extends Fragment {
 
     String LOG_TAG = "Frag_main_filelist";
     Context mContext;
-    public Playlist_manager_db mPLM_DB;
     public Adapter_Main_PlayList mAdapterMainPlayList;
     ListView listview_playList;
-    MediaPlayerController mMediaPlayerController;
-    ArrayList<String> filelist;
+    ArrayList<String> mFilelist;
+    int mCurrentPlayingPosition = 0;
+    //Handler mMainHandler;
 
-    public Frag_main_filelist(Context context, Playlist_manager_db db, MediaPlayerController mediaPlayerController ) {
+    public Frag_main_filelist(Context context) {
         mContext = context;
-        mPLM_DB = db;
-        mMediaPlayerController = mediaPlayerController;
+        //mMainHandler = mainHandler;
+
+        MediaPlayerController.OnPlayingCompleteCb onPlayingCompleteCb = new MediaPlayerController.OnPlayingCompleteCb() {
+            @Override
+            public void onPlayingCompleteCb() {
+                Log.d(LOG_TAG, "OnPlayingCompleteCb Log Constants.OneRepeatMode " + Constants.OneRepeatMode);
+
+                if(Constants.OneRepeatMode == true) {
+                    Log.d(LOG_TAG, "OnPlayingCompleteCb OneRepeatMode true");
+                    //MediaPlayerController.sController.stopPlay();
+                    //MediaPlayerController.sController.startPlay();
+                    return;
+                }
+
+                if(mFilelist.size() > mCurrentPlayingPosition + 1) {
+                    mCurrentPlayingPosition++;
+                    Valueable_Util.setCurrentPlayingPosition(mCurrentPlayingPosition);
+                    MediaPlayerController.sController.stopPlay();
+                    MediaPlayerController.sController.setPlayFile(mFilelist.get(mCurrentPlayingPosition));
+                    ((MainActivity)mContext).btn_play_pause.setImageResource(R.drawable.btn_pause);
+                    MediaPlayerController.sController.startPlay();
+                    mAdapterMainPlayList.setSelectedIndex(mCurrentPlayingPosition);
+
+                    listview_playList.setAdapter(mAdapterMainPlayList);
+                    listview_playList.setSelection(mCurrentPlayingPosition);
+                }
+            }
+        };
+
+        MediaPlayerController.sController.setOnPlayingCompleteCb(onPlayingCompleteCb);
     }
 
     @Override
@@ -56,27 +84,47 @@ public class Frag_main_filelist extends Fragment {
         mAdapterMainPlayList.resetItems();
         listview_playList.setAdapter(mAdapterMainPlayList);
         listview_playList.setOnItemClickListener(listener);
+
+        try {
+            playListViewInit();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         return rootView;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        playListViewInit();
+
+        Log.d(LOG_TAG, "onResume() Frag_main_filelist");
+        try {
+            if(Constants.ChangeFragMainFileList == true) {
+                Log.d(LOG_TAG, "onResume() ChangeFragMainFileList is true");
+                playListViewInit();
+                Constants.ChangeFragMainFileList = false;
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 
-    boolean playListViewInit() {
+    boolean playListViewInit() throws InterruptedException {
         Log.d(LOG_TAG, "playListViewInit ");
         mAdapterMainPlayList.resetItems();
 
-        if(Constants.mCurrentPlaylistIdx > 0) {
+        int currentPlaylistIdx = Valueable_Util.getCurrentPlaylistIdx();
 
-            int numOfItems = mPLM_DB.getNumOfItemsInPlaylist(Constants.mCurrentPlaylistIdx);
-            filelist = mPLM_DB.getFilelist(Constants.mCurrentPlaylistIdx);
-            Log.d(LOG_TAG, "playListViewInit mCurrentPlaylistIdx " + Constants.mCurrentPlaylistIdx);
+        if(currentPlaylistIdx > 0) {
+
+            int numOfItems = DataBases.mPLM_DB.getNumOfItemsInPlaylist(currentPlaylistIdx);
+            mFilelist = DataBases.mPLM_DB.getFilelist(currentPlaylistIdx);
+            Log.d(LOG_TAG, "playListViewInit currentPlaylistIdx " + currentPlaylistIdx);
 
             for(int i = 0; i < numOfItems; i++ ) {
-                String filepath = filelist.get(i);
+                String filepath = mFilelist.get(i);
                 //Log.d(LOG_TAG, "playListViewInit fileName " + filepath);
                 int index = filepath.lastIndexOf("/");
                 String fileName = filepath.substring(index+1);
@@ -85,9 +133,39 @@ public class Frag_main_filelist extends Fragment {
             }
 
             if(numOfItems > 0) {
-                mMediaPlayerController.setPlayFile(filelist.get(0));
-                mMediaPlayerController.setDuration();
-                Constants.FILE_READY_STATUS = Constants.FILE_READY;
+                Log.d(LOG_TAG, "playListViewInit numOfItems " + numOfItems);
+                Log.d(LOG_TAG, "playListViewInit set file name " + mFilelist.get(0));
+
+                if(MediaPlayerController.sController.mMediaPlayerInitComplete == false) {
+                    Log.d(LOG_TAG, "playListViewInit Media Player initialize not complete case");
+                    Thread myThread = new Thread(new Runnable() {
+                        public void run() {
+                            while (MediaPlayerController.sController.mMediaPlayerInitComplete == false) {
+                                try {
+                                    Log.d(LOG_TAG, "playListViewInit wait for Media Player initialize");
+                                    Thread.sleep(300);
+                                } catch (Throwable t) {
+                                }
+                            }
+                            Log.d(LOG_TAG, "playListViewInit complete Media Player initialize");
+                            try {
+                                Thread.sleep(100);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            MediaPlayerController.sController.setPlayFile(mFilelist.get(0));
+                        }
+                    });
+
+                    myThread.start();
+                } else {
+                    Log.d(LOG_TAG, "playListViewInit Media Player initialize complete case");
+                    MediaPlayerController.sController.stopPlay();
+                    MediaPlayerController.sController.setPlayFile(mFilelist.get(0));
+                    //(ImageButton)((AppCompatActivity)mContext).findViewById(R.id.btn_play_pause_id).callOnClick();
+                    ((MainActivity)mContext).btn_play_pause.setImageResource(R.drawable.btn_play);
+                    ((MainActivity)mContext).seekBar.setProgress(0);
+                }
             }
         }
 
@@ -107,19 +185,22 @@ public class Frag_main_filelist extends Fragment {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             // TODO Auto-generated method stub
             Log.d(LOG_TAG, "onListItemClick path.get(position) : " + position);
-            Log.d(LOG_TAG, "onListItemClick mCurrentPlaylistIdx : " + Constants.mCurrentPlaylistIdx);
+            int currentPlaylistIdx = Valueable_Util.getCurrentPlaylistIdx();
+            Log.d(LOG_TAG, "onListItemClick CurrentPlaylistIdx : " + currentPlaylistIdx);
 
-            mMediaPlayerController.stopPlay();
-            mMediaPlayerController.setPlayFile(filelist.get(position));
-            mMediaPlayerController.setDuration();
-            mMediaPlayerController.startPlay();
+            MediaPlayerController.sController.stopPlay();
+            MediaPlayerController.sController.setPlayFile(mFilelist.get(position));
+            ((MainActivity)mContext).btn_play_pause.setImageResource(R.drawable.btn_pause);
+            MediaPlayerController.sController.startPlay();
 
             mAdapterMainPlayList.setSelectedIndex(position);
-
+            mCurrentPlayingPosition = position;
+            Valueable_Util.setCurrentPlayingPosition(mCurrentPlayingPosition);
             listview_playList.setAdapter(mAdapterMainPlayList);
-
-
+            listview_playList.setSelection(position);
         }
     };
+
+
 
 }

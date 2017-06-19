@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.PlaybackParams;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -14,9 +15,11 @@ import android.util.Log;
 
 import com.e4deen.bean_player.data.Constants;
 import com.e4deen.bean_player.util.VolumeUtil;
+import com.e4deen.bean_player.view.player_view.activity.MainActivity;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 
 /**
  * Created by user on 2016-12-19.
@@ -42,13 +45,14 @@ public class MediaPlayerService extends Service {
 
     @Override
     public void onCreate() {
+        Log.d(LOG_TAG, "MediaPlayerService onCreate()");
         super.onCreate();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         playerInit();
-        Log.d(LOG_TAG, "Test mLeftVol " + mLeftVol + ", mRightVol " + mRightVol);
+        Log.d(LOG_TAG, "onStartCommand() Test mLeftVol " + mLeftVol + ", mRightVol " + mRightVol);
         mVolumeUtil = new VolumeUtil();
         return super.onStartCommand(intent, flags, startId);
     }
@@ -84,13 +88,17 @@ public class MediaPlayerService extends Service {
         @Override
         public void handleMessage(Message msg) {
 
-            Log.d(LOG_TAG, "handleMessage msg.what : " + msg.what);
+            //Log.d(LOG_TAG, "handleMessage msg.what : " + msg.what);
+            ArrayList<String> listArgs;
 
             switch (msg.what) {
                 case MediaPlayerController.COMMAND_CONNECT:  // 0
                     // Register activity hander
+                    //listArgs = (ArrayList<String>)msg.obj;
+                    //mRemote = (Messenger) listArgs.get(0);
                     mRemote = (Messenger) msg.obj;
                     playerInit();
+                    remoteSendMessage(MediaPlayerController.COMMAND_MEDIAPLAYER_READY_COMPLETE, "");
                     Log.d(LOG_TAG, "handleMessage MediaPlayerService is connected");
                     break;
                 case MediaPlayerController.COMMAND_PLAY:    // 1
@@ -117,46 +125,68 @@ public class MediaPlayerService extends Service {
                     break;
                 case MediaPlayerController.COMMAND_FF:      // 4
                     if(Constants.FILE_READY_STATUS == Constants.FILE_READY ) {
-                        String mSec = ((String)msg.obj);
+                        listArgs = (ArrayList<String>)msg.obj;
+                        String mSec = (String) listArgs.get(0);
+                        //String mSec = ((String)msg.obj);
                         ffPlay(Integer.parseInt(mSec));
                     } else {
 //                        Log.d(LOG_TAG, "handleMessage COMMAND_FF. FILE_READY_STATUS " + Constants.FILE_READY_STATUS);
-                    }
+                      }
                     break;
                 case MediaPlayerController.COMMAND_REW:     // 5
                     if(Constants.FILE_READY_STATUS == Constants.FILE_READY) {
-                        String mSec = ((String)msg.obj);
+                        listArgs = (ArrayList<String>)msg.obj;
+                        String mSec = (String) listArgs.get(0);
+                        //String mSec = ((String)msg.obj);
                         rewPlay(Integer.parseInt(mSec));
                     } else {
 //                        Log.d(LOG_TAG, "handleMessage COMMAND_REW. FILE_READY_STATUS " + Constants.FILE_READY_STATUS);
                     }
                     break;
+
                 case MediaPlayerController.COMMAND_SET_FILE:    // 6
-                    playFile = (String)msg.obj;
+                    listArgs = (ArrayList<String>)msg.obj;
+                    String playFile = (String) listArgs.get(0);
+                    //playFile = (String)msg.obj;
                     Log.d(LOG_TAG, "handleMessage COMMAND_SET_FILE / playFile : " + playFile);
                     setPlayFile(playFile);
                     break;
+
                 case MediaPlayerController.COMMAND_SPEED_UP:    // 7
                     mPlaybackSpeed += 0.1;
+                    if(mPlaybackSpeed >= 3.0f)
+                        mPlaybackSpeed = 3.0f;
+
                     format_PlaybackSpeed = new DecimalFormat(".#");
 
                     remoteSendMessage(MediaPlayerController.COMMAND_UPDATE_PLAYBACK_SPEED, format_PlaybackSpeed.format(mPlaybackSpeed) );
-                    //remoteSendMessage(MediaPlayerController.COMMAND_UPDATE_PLAYBACK_SPEED, Float.toString(mPlaybackSpeed) );
-                    Log.d(LOG_TAG, "handleMessage COMMAND_SPEED_UP mPlaybackSpeed " + mPlaybackSpeed);
+
                     if(Constants.PLAYER_STATUS == Constants.PLAYER_STATUS_PLAY) {
-                        mediaPlayer.setPlaybackParams(mediaPlayer.getPlaybackParams().setSpeed(mPlaybackSpeed));
+                        Log.d(LOG_TAG, "handleMessage COMMAND_SPEED_UP set playback param mPlaybackSpeed" + mPlaybackSpeed);
+
+                        PlaybackParams playbackParams = mediaPlayer.getPlaybackParams();
+                        playbackParams.setSpeed(mPlaybackSpeed);
+                        mediaPlayer.setPlaybackParams(playbackParams);
                     }
                     break;
+
                 case MediaPlayerController.COMMAND_SPEED_DOWN:  // 8
                     mPlaybackSpeed -= 0.1;
-                    //DecimalFormat format2 = new DecimalFormat(".#");
-                    remoteSendMessage(MediaPlayerController.COMMAND_UPDATE_PLAYBACK_SPEED, format_PlaybackSpeed.format(mPlaybackSpeed) );
-                    //remoteSendMessage(MediaPlayerController.COMMAND_UPDATE_PLAYBACK_SPEED, Float.toString(mPlaybackSpeed) );
+
+                    if(mPlaybackSpeed <= 0.3f)
+                        mPlaybackSpeed = 0.3f;
+
+                    DecimalFormat format2 = new DecimalFormat(".#");
+                    remoteSendMessage(MediaPlayerController.COMMAND_UPDATE_PLAYBACK_SPEED, format2.format(mPlaybackSpeed) );
+
                     Log.d(LOG_TAG, "handleMessage COMMAND_SPEED_DOWN " + mPlaybackSpeed);
                     if(Constants.PLAYER_STATUS == Constants.PLAYER_STATUS_PLAY) {
-                        mediaPlayer.setPlaybackParams(mediaPlayer.getPlaybackParams().setSpeed(mPlaybackSpeed));
+                        PlaybackParams playbackParams = mediaPlayer.getPlaybackParams();
+                        playbackParams.setSpeed(mPlaybackSpeed);
+                        mediaPlayer.setPlaybackParams(playbackParams);
                     }
                     break;
+
                 case MediaPlayerController.COMMAND_SET_BOOKMARK:    // 9
                     Log.d(LOG_TAG, "handleMessage COMMAND_SET_BOOKMARK");
                     break;
@@ -178,7 +208,9 @@ public class MediaPlayerService extends Service {
                     break;
                 case MediaPlayerController.COMMAND_UPDATE_SEEKTO:      // 14
                     if(Constants.FILE_READY_STATUS == Constants.FILE_READY) {
-                        String progress = ((String)msg.obj);
+                        listArgs = (ArrayList<String>)msg.obj;
+                        String progress = (String) listArgs.get(0);
+                        //String progress = ((String)msg.obj);
                         SeekTo(Integer.parseInt(progress));
                     }
                     break;
@@ -200,38 +232,58 @@ public class MediaPlayerService extends Service {
 
                 case MediaPlayerController.COMMAND_SET_LEFT_LOOPBACK_VOL:      // 19
                     Log.d(LOG_TAG, "handleMessage COMMAND_SET_LEFT_LOOPBACK_VOL");
-                    String vol = ((String)msg.obj);
+                    listArgs = (ArrayList<String>)msg.obj;
+                    String vol = (String) listArgs.get(0);
+                    //String vol = ((String)msg.obj);
                     setLoopbackLeftVol(Integer.parseInt(vol));
                     break;
 
                 case MediaPlayerController.COMMAND_SET_RIGHT_LOOPBACK_VOL:      // 20
                     Log.d(LOG_TAG, "handleMessage COMMAND_SET_RIGHT_LOOPBACK_VOL");
-                    vol = ((String)msg.obj);
+                    listArgs = (ArrayList<String>)msg.obj;
+                    vol = (String) listArgs.get(0);
+                    //vol = ((String)msg.obj);
                     setLoopbackRightVol(Integer.parseInt(vol));
                     break;
 
                 case MediaPlayerController.COMMAND_SET_LEFT_PLAYING_FILE_VOL:      // 21
                     Log.d(LOG_TAG, "handleMessage COMMAND_SET_LEFT_PLAYING_FILE_VOL");
-                    vol = ((String)msg.obj);
+                    listArgs = (ArrayList<String>)msg.obj;
+                    vol = (String) listArgs.get(0);
+                    //vol = ((String)msg.obj);
                     setPlayingFileLeftVol(Integer.parseInt(vol));
                     break;
 
                 case MediaPlayerController.COMMAND_SET_RIGHT_PLAYING_FILE_VOL:      // 22
                     Log.d(LOG_TAG, "handleMessage COMMAND_SET_RIGHT_PLAYING_FILE_VOL");
-                    vol = ((String)msg.obj);
+                    listArgs = (ArrayList<String>)msg.obj;
+                    vol = (String) listArgs.get(0);
+                    //vol = ((String)msg.obj);
                     setPlayingFileRightVol(Integer.parseInt(vol));
                     break;
 
                 case MediaPlayerController.COMMAND_SET_LOOPBACK_MASTER_VOL:      // 23
                     Log.d(LOG_TAG, "handleMessage COMMAND_SET_LOOPBACK_MASTER_VOL");
-                    vol = ((String)msg.obj);
+                    listArgs = (ArrayList<String>)msg.obj;
+                    vol = (String) listArgs.get(0);
+                    //vol = ((String)msg.obj);
                     setLoopbackMasterVol(Integer.parseInt(vol));
                     break;
 
                 case MediaPlayerController.COMMNAD_SET_PLAYING_FILE_MASTER_VOL:      // 24
                     Log.d(LOG_TAG, "handleMessage COMMNAD_SET_PLAYING_FILE_MASTER_VOL");
-                    vol = ((String)msg.obj);
+                    listArgs = (ArrayList<String>)msg.obj;
+                    vol = (String) listArgs.get(0);
+                    //vol = ((String)msg.obj);
                     setPlayingFileMasterVol(Integer.parseInt(vol));
+                    break;
+
+                case MediaPlayerController.COMMAND_SET_PERIOD_REPEAT:      // 24
+                    listArgs = (ArrayList<String>)msg.obj;
+                    //vol = (String) listArgs.get(0);
+
+                    Log.d(LOG_TAG, "handleMessage COMMAND_SET_PERIOD_REPEAT arg1 " + listArgs.get(0) + ", arg2 " + listArgs.get(1) );
+
                     break;
 
                 case MediaPlayerController.COMMAND_DISCONNECT:      // 99
@@ -248,14 +300,29 @@ public class MediaPlayerService extends Service {
 //--------------------------------------------------------------------------------------------
     public int playerInit()  {
 
+        Log.d(LOG_TAG, "playerInit()");
         mediaPlayer = new MediaPlayer();
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                Constants.FILE_READY_STATUS = Constants.FILE_NOT_READY;
-                // TODO Auto-generated method stub
-                stopSelf();
+
+                if(Constants.OneRepeatMode == false) {
+                    Log.d(LOG_TAG, "setOnCompletionListener() Constants.OneRepeatMode false");
+                    Constants.FILE_READY_STATUS = Constants.FILE_NOT_READY;
+                    remoteSendMessage(MediaPlayerController.COMMAND_ON_PLAYING_COMPLETE, Integer.toString(0) );
+                    stopSelf();
+                } else if( Constants.OneRepeatMode == true ) {
+                    Log.d(LOG_TAG, "setOnCompletionListener() in playerInit() Constants.OneRepeatMode true");
+                    /*
+                    try {
+                        mediaPlayer.prepare();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    mediaPlayer.start();
+                    */
+                }
             }
         });
 
@@ -263,31 +330,49 @@ public class MediaPlayerService extends Service {
 
         return E_SUCCESS;
     }
+/*
+    MediaPlayer.OnCompletionListener mOnCompleteListner = new MediaPlayer.OnCompletionListener() {
+
+        public void
+
+        @Override
+        public void onCompletion(MediaPlayer mp) {
+            remoteSendMessage(MediaPlayerController.COMMAND_ON_PLAYING_COMPLETE, Integer.toString(0) );
+        }
+    }
+*/
 
     public int setPlayFile(String fullPath)  {
 
         try {
+            Log.d(LOG_TAG, "setPlayFile() " + fullPath + ", mPlaybackSpeed " + mPlaybackSpeed);
+
             mediaPlayer.reset();
+            mediaPlayer.setDataSource(fullPath);
+            mediaPlayer.prepare();
+//            PlaybackParams params = new PlaybackParams();
+//            params.setSpeed(1.1f);
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+//            mediaPlayer.setPlaybackParams(params);
             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
 
-                    Constants.FILE_READY_STATUS = Constants.FILE_NOT_READY;
-                    // TODO Auto-generated method stub
-                    stopSelf();
+                    if(Constants.OneRepeatMode == false) {
+                        Constants.FILE_READY_STATUS = Constants.FILE_NOT_READY;
+                        remoteSendMessage(MediaPlayerController.COMMAND_ON_PLAYING_COMPLETE, Integer.toString(0));
+                        stopSelf();
+                    } else if (Constants.OneRepeatMode == true) {
+
+                        Log.d(LOG_TAG, "setOnCompletionListener() in setPlayFile() OneRepeatMode true current position " + mediaPlayer.getCurrentPosition() +
+                                ", getDuration " + mediaPlayer.getDuration());
+
+                        //mediaPlayer.seekTo(10);
+                        //mediaPlayer.start();
+
+                    }
                 }
             });
-
-            mediaPlayer.setDataSource(fullPath);
-
-            try {
-                mediaPlayer.prepare();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (IllegalStateException e) {
-                e.printStackTrace();
-            }
         } catch (IOException e) {
             e.printStackTrace();
         } catch (IllegalArgumentException e) {
@@ -305,7 +390,17 @@ public class MediaPlayerService extends Service {
 
     public int startPlay() throws IOException {
         Log.d(LOG_TAG, "startPlay mLeftVol " + mLeftVol + ", mRightVol " + mRightVol);
-        mediaPlayer.setPlaybackParams(mediaPlayer.getPlaybackParams().setSpeed(mPlaybackSpeed));
+
+        if(mediaPlayer.getPlaybackParams() == null) {
+            Log.d(LOG_TAG, "startPlay playback param is null");
+        } else {
+            Log.d(LOG_TAG, "startPlay playback param is not null");
+        }
+        //mediaPlayer.setPlaybackParams(mediaPlayer.getPlaybackParams().setSpeed(mPlaybackSpeed));
+        PlaybackParams params = new PlaybackParams();
+        params.setSpeed(mPlaybackSpeed);
+        mediaPlayer.setPlaybackParams(params);
+
         mediaPlayer.start();
         mediaPlayer.setVolume(mLeftVol, mRightVol);
 
@@ -319,8 +414,11 @@ public class MediaPlayerService extends Service {
     }
 
     public int stopPlay() {
-        Log.d(LOG_TAG, "stopPlay");
-        mediaPlayer.stop();
+        Log.d(LOG_TAG, "stopPlay()");
+        if(mediaPlayer.isPlaying()) {
+            Log.d(LOG_TAG, "stopPlay() - isPlaying() is true");
+            mediaPlayer.stop();
+        }
         return E_SUCCESS;
     }
 
@@ -377,16 +475,11 @@ public class MediaPlayerService extends Service {
 
     public int setRepeat() {
         if( Constants.FILE_READY_STATUS == Constants.FILE_READY) {
-            if (Constants.REPEAT_STATE == Constants.NOT_REPEAT) {
-                Constants.REPEAT_STATE = Constants.REPEAT;
+            if (Constants.OneRepeatMode == true) {
+                Log.e(LOG_TAG, "MediaPlayerService setRepeat() setLooping enable");
                 mediaPlayer.setLooping(true);
-
-
-                if (Constants.SHUFFLE_STATE == Constants.SHUFFLE) {
-                    Constants.SHUFFLE_STATE = Constants.NOT_SUFFLE;
-                }
             } else {
-                Constants.REPEAT_STATE = Constants.NOT_REPEAT;
+                Log.e(LOG_TAG, "MediaPlayerService setRepeat() setLooping disable");
                 mediaPlayer.setLooping(false);
             }
         } else {

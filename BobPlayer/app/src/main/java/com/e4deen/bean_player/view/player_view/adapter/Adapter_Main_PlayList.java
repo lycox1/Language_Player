@@ -20,7 +20,7 @@ import java.util.ArrayList;
  */
 public class Adapter_Main_PlayList extends BaseAdapter {
 
-    static String LOG_TAG = "Jog_Player_PlayList_Adapter";
+    static String LOG_TAG = "Bean_Player_Main_FileList_Adapter";
     final int E_SUCCESS = 1;
     final int E_ERROR = 0;
     int mSelectedIndex = 0;
@@ -42,6 +42,7 @@ public class Adapter_Main_PlayList extends BaseAdapter {
         final Context context = parent.getContext();
 
         Log.e(LOG_TAG, "getView position " + position);
+
         // "listview_item" Layout을 inflate하여 convertView 참조 획득.
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);

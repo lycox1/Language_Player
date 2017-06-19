@@ -23,7 +23,7 @@ import java.util.ArrayList;
 
 public class Adapter_plm_filelist extends BaseAdapter {
 
-    static String LOG_TAG = "Jog_Player_PlayList_Adapter";
+    static String LOG_TAG = "Bean_Player_PLM_FileList_Adapter";
     final int E_SUCCESS = 1;
     final int E_ERROR = 0;
     boolean mSelectAllMode = false;
@@ -104,12 +104,22 @@ public class Adapter_plm_filelist extends BaseAdapter {
             }
         }
 
+        Paint paint = new Paint();
+
+        Log.e(LOG_TAG, "getView position " + position + ", file name " + playListFiles.get(position).getPath() + ", selection state " + playListFiles.get(position).getSelection());
+
         if(mSelectAllMode == true) {
-            Paint paint = new Paint();
             paint.setColor(R.color.colorPrimary);
             paint.setAlpha(40);
-            convertView.setBackgroundColor(paint.getColor());
+        } else if ( playListFiles.get(position).getSelection() ) {
+            paint.setColor(R.color.colorPrimary);
+            paint.setAlpha(40);
+        } else {
+            paint.setColor(Color.WHITE);
+            paint.setAlpha(0);
         }
+
+        convertView.setBackgroundColor(paint.getColor());
 
         return convertView;
     }
@@ -131,6 +141,12 @@ public class Adapter_plm_filelist extends BaseAdapter {
         playListFiles.clear();
     }
 
+    public void setSelectionForIndex(int position, boolean set) {
+        Lv_item_filelist item = playListFiles.get(position);
+        item.setSelection(set);
+        playListFiles.set(position, item);
+    }
+
     @Override
     public boolean areAllItemsEnabled() {
         return true;
@@ -143,5 +159,6 @@ public class Adapter_plm_filelist extends BaseAdapter {
     public long getItemId(int position) {
         return position ;
     }
+
 
 }

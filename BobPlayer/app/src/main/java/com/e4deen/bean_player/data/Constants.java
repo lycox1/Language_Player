@@ -30,6 +30,9 @@ public class Constants {
     public static int BOOKMARK_B = 1;
     public static int PROGRESS_BAR_TIME = 2;
 
+    public static boolean ChangeFragMainFileList = false;
+    public static boolean OneRepeatMode = false;
+
     public static int SEC = 1000;
 
     public static String FRAG_PLM_FILELIST = "frag_plm_filelist";
@@ -40,19 +43,12 @@ public class Constants {
     public static int IDX_PLM_FILELIST = 2;
     public static int frag_plm_state = IDX_PLM_PLAYLIST;
 
-    public static String newPlaylistName;
-
     public static final float[] NEGATIVE = {
             -1.0f,     0,     0,    0, 255, // red
             0, -1.0f,     0,    0, 255, // green
             0,     0, -1.0f,    0, 255, // blue
             0,     0,     0, 1.0f,   0  // alpha
     };
-
-    public static int mNewPlaylistIdx = 0;
-    public static int mCurrentPlaylistIdx = 0;
-
-
 
     public static String FRAG_MAIN_TAB_FILELIST = "frag_main_tab_filelist";
     public static String FRAG_MAIN_TAB_SHADOWING = "frag_main_tab_shadowing";
@@ -66,8 +62,5 @@ public class Constants {
     public static int frag_main_tab_state = IDX_MAIN_TAB_FILELIST;
     public static int SHADOWING_MY_VOICE_ONOFF_STATE = STATE_OFF;
     public static int SHADOWING_PLAYING_FILE_ONOFF_STATE = STATE_ON;
-
-
-
 
 }

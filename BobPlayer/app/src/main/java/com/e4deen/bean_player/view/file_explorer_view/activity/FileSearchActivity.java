@@ -27,7 +27,7 @@ public class FileSearchActivity extends AppCompatActivity {
 
     Context mContext;
     Vibe mVibe;
-    public Playlist_manager_db mPLM_DB;
+    //public Playlist_manager_db mPLM_DB;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -37,12 +37,12 @@ public class FileSearchActivity extends AppCompatActivity {
         Vibe.mVibe = new Vibe(mContext);
 
         Log.d(LOG_TAG, "FileSearchActivity onCreate()" );
-        mPLM_DB = new Playlist_manager_db(this);
-        mPLM_DB.open();
+        //mPLM_DB = new Playlist_manager_db(this);
+        //mPLM_DB.open();
 
         FragmentManager fm = getFragmentManager();
         FragmentTransaction fragmentTransaction = fm.beginTransaction();
-        fragmentTransaction.add(R.id.layout_playlist_manager, new Frag_plm_playlist(mContext,mPLM_DB), Constants.FRAG_PLM_PLAYLIST);
+        fragmentTransaction.add(R.id.layout_playlist_manager, new Frag_plm_playlist(mContext), Constants.FRAG_PLM_PLAYLIST);
         fragmentTransaction.commit();
         fm.executePendingTransactions();
         Constants.frag_plm_state = Constants.IDX_PLM_PLAYLIST;
@@ -65,7 +65,7 @@ public class FileSearchActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         Log.d(LOG_TAG, "FileSearchActivity onDestroy()");
-        mPLM_DB.close();
+        //mPLM_DB.close();
     }
 
     @Override
@@ -86,15 +86,15 @@ public class FileSearchActivity extends AppCompatActivity {
         Log.d(LOG_TAG, "fragment_switch fragNum " + fragNum);
 
         if(fragNum == Constants.IDX_PLM_FILELIST) {
-            fragmentTransaction.replace(R.id.layout_playlist_manager, new Frag_plm_filelist(mContext, mPLM_DB), Constants.FRAG_PLM_FILELIST);
+            fragmentTransaction.replace(R.id.layout_playlist_manager, new Frag_plm_filelist(mContext), Constants.FRAG_PLM_FILELIST);
             fragmentTransaction.addToBackStack(null);
             Constants.frag_plm_state = Constants.IDX_PLM_FILELIST;
         } else if(fragNum == Constants.IDX_PLM_PLAYLIST) {
-            fragmentTransaction.replace(R.id.layout_playlist_manager, new Frag_plm_playlist(mContext, mPLM_DB), Constants.FRAG_PLM_PLAYLIST);
+            fragmentTransaction.replace(R.id.layout_playlist_manager, new Frag_plm_playlist(mContext), Constants.FRAG_PLM_PLAYLIST);
             Constants.frag_plm_state = Constants.IDX_PLM_PLAYLIST;
             fragmentTransaction.addToBackStack(null);
         } else if(fragNum == Constants.IDX_PLM_PLAYLIST_FILES) {
-            fragmentTransaction.replace(R.id.layout_playlist_manager, new Frag_plm_playlist_files(mContext, mPLM_DB), Constants.FRAG_PLM_PLAYLIST_FILES);
+            fragmentTransaction.replace(R.id.layout_playlist_manager, new Frag_plm_playlist_files(mContext), Constants.FRAG_PLM_PLAYLIST_FILES);
             Constants.frag_plm_state = Constants.IDX_PLM_PLAYLIST_FILES;
             fragmentTransaction.addToBackStack(null);
         }

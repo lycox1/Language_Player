@@ -13,8 +13,10 @@ import android.widget.TextView;
 
 import com.e4deen.bean_player.R;
 import com.e4deen.bean_player.data.Constants;
+import com.e4deen.bean_player.db.DataBases;
 import com.e4deen.bean_player.db.PlaylistTitlesClass;
 import com.e4deen.bean_player.db.Playlist_manager_db;
+import com.e4deen.bean_player.util.Valueable_Util;
 import com.e4deen.bean_player.util.Vibe;
 import com.e4deen.bean_player.view.file_explorer_view.activity.FileSearchActivity;
 
@@ -27,16 +29,16 @@ import java.util.ArrayList;
 public class Adapter_plm_playlist extends BaseAdapter {
 
 
-    static String LOG_TAG = "Jog_Player_PlayList_Adapter";
+    static String LOG_TAG = "Bean_Player_PLM_PlayList_Adapter";
     final int E_SUCCESS = 1;
     final int E_ERROR = 0;
-    public Playlist_manager_db mPLM_DB;
+    //public Playlist_manager_db mPLM_DB;
     Context mContext;
 
     ArrayList<PlaylistTitlesClass> mPlaylistTitleItems = new ArrayList<PlaylistTitlesClass>();
 
-    public Adapter_plm_playlist(Playlist_manager_db db, Context context) {
-        mPLM_DB = db;
+    public Adapter_plm_playlist(Context context) {
+        //mPLM_DB = db;
         mContext = context;
     }
 
@@ -124,7 +126,8 @@ public class Adapter_plm_playlist extends BaseAdapter {
                             ImageView img_btn = (ImageView) v;
                             img_btn.clearColorFilter();
 
-                            Constants.mCurrentPlaylistIdx = (int)v.getTag();
+                            Valueable_Util.setCurrentPlaylistIdx((int)v.getTag());
+                            Constants.ChangeFragMainFileList = true;
 
                             ((FileSearchActivity)mContext).finishFragment();
                             ((FileSearchActivity)mContext).finish();
@@ -148,14 +151,14 @@ public class Adapter_plm_playlist extends BaseAdapter {
                             ImageView img_btn = (ImageView) v;
                             img_btn.clearColorFilter();
 
-                            Log.d(LOG_TAG, "btn_plm_playlist_delete test log before numOfPlaylist" + mPLM_DB.getLastIndex() );
-                            mPLM_DB.removePlaylist((int)(v.getTag()));
-                            int numOfPlaylist = mPLM_DB.getLastIndex();
+                            Log.d(LOG_TAG, "btn_plm_playlist_delete test log before numOfPlaylist" + DataBases.mPLM_DB.getLastIndex() );
+                            DataBases.mPLM_DB.removePlaylist((int)(v.getTag()));
+                            int numOfPlaylist = DataBases.mPLM_DB.getLastIndex();
                             Log.d(LOG_TAG, "btn_plm_playlist_delete test log after numOfPlaylist" + numOfPlaylist );
                             PlaylistTitlesClass playlistTitle;
                             mPlaylistTitleItems.clear();
                             for(int i=1; i <= numOfPlaylist; i++) {
-                                playlistTitle = mPLM_DB.getPlaylistTitleItem(i);
+                                playlistTitle = DataBases.mPLM_DB.getPlaylistTitleItem(i);
                                 Log.d(LOG_TAG, "lsw onCreateView i " + i + " , name " + playlistTitle.name);
                                 mPlaylistTitleItems.add(playlistTitle);
                             }

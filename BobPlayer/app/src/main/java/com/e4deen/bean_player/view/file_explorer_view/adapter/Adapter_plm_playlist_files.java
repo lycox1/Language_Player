@@ -29,18 +29,18 @@ import java.util.ArrayList;
 
 public class Adapter_plm_playlist_files extends BaseAdapter {
 
-    static String LOG_TAG = "Jog_Player_PlayList_Adapter";
+    static String LOG_TAG = "Bean_Player_PLM_PlayListFiles_Adapter";
     final int E_SUCCESS = 1;
     final int E_ERROR = 0;
     boolean mSelectAllMode = false;
     Context mContext;
-    Playlist_manager_db mPLM_DB;
+    //Playlist_manager_db mPLM_DB;
 
     ArrayList<Lv_item_filelist> playListFiles = new ArrayList<Lv_item_filelist>();
 
-    public Adapter_plm_playlist_files(Context context, Playlist_manager_db db) {
+    public Adapter_plm_playlist_files(Context context) {
         mContext = context;
-        mPLM_DB = db;
+        //mPLM_DB = db;
     }
 
     public void setSelectAllMode(boolean onOff) {

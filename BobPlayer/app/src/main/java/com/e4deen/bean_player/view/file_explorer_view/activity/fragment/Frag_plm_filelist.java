@@ -9,6 +9,7 @@ import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.os.Environment;
+import android.renderscript.Sampler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -23,7 +24,9 @@ import android.widget.Toast;
 import com.e4deen.bean_player.R;
 import com.e4deen.bean_player.data.Constants;
 import com.e4deen.bean_player.data.FileUtility;
+import com.e4deen.bean_player.db.DataBases;
 import com.e4deen.bean_player.db.Playlist_manager_db;
+import com.e4deen.bean_player.util.Valueable_Util;
 import com.e4deen.bean_player.util.Vibe;
 import com.e4deen.bean_player.view.file_explorer_view.activity.FileSearchActivity;
 import com.e4deen.bean_player.view.file_explorer_view.adapter.Adapter_plm_filelist;
@@ -38,21 +41,21 @@ import java.util.ArrayList;
 
 public class Frag_plm_filelist extends Fragment {
 
-    String LOG_TAG = "Frag_plm_filelist";
+    String LOG_TAG = "Bean_Player_Frag_plm_filelist";
     File file;
     ListView lv_ObjectList;
     Adapter_plm_filelist mAdapter_plm_filelist;
     public TextView mPath;
     static public String root = Environment.getExternalStorageDirectory() + "";
     Context mContext;
-    public Playlist_manager_db mPLM_DB;
+    //public Playlist_manager_db mPLM_DB;
     public ArrayList<String> mFilelist;
     int numOfFiles = 0;
     boolean mSelectAllMode = false;
 
-    public Frag_plm_filelist(Context context, Playlist_manager_db db) {
+    public Frag_plm_filelist(Context context) {
         mContext = context;
-        mPLM_DB = db;
+        //mPLM_DB = db;
     }
 
     @Override
@@ -65,6 +68,7 @@ public class Frag_plm_filelist extends Fragment {
 
         lv_ObjectList = (ListView) rootView.findViewById(R.id.lv_file_explorer);
         mAdapter_plm_filelist = new Adapter_plm_filelist();
+        Log.d(LOG_TAG, "onCreateView setAdapter");
         lv_ObjectList.setAdapter(mAdapter_plm_filelist);
         lv_ObjectList.setOnItemClickListener(listener);
 
@@ -73,9 +77,8 @@ public class Frag_plm_filelist extends Fragment {
         rootView.findViewById(R.id.btn_plm_select_all).setOnTouchListener(mBtnOnTouchistener);
 
         getDir(root);
-        //Constants.mCurrentPlaylistIdx = mPLM_DB.getNewIndex();
 
-        Log.d(LOG_TAG, "onCreateView mCurrentPlaylistIdx " + Constants.mCurrentPlaylistIdx);
+        Log.d(LOG_TAG, "onCreateView CurrentPlaylistIdx " + Valueable_Util.getCurrentPlaylistIdx());
 
         return rootView;
     }
@@ -94,7 +97,8 @@ public class Frag_plm_filelist extends Fragment {
                 // Filters based on whether the file is hidden or not
                 if( sel.isFile() && FileUtility.isAudioFile(sel) ) {
                     //return true;
-                } else if( sel.isDirectory() && FileUtility.hasAudioFolder(sel) ) {
+//                } else if( sel.isDirectory() && FileUtility.hasAudioFolder(sel) ) {
+                } else if( sel.isDirectory() && FileUtility.FolderWithMusic(sel.getAbsolutePath())) {
                     //return true;
                 } else {
                     return false;
@@ -143,18 +147,14 @@ public class Frag_plm_filelist extends Fragment {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             // TODO Auto-generated method stub
-            Log.d(LOG_TAG, "onListItemClick   path.get(position) : " );
+            //Log.d(LOG_TAG, "onListItemClick   path.get(position) : " + position );
 
             //클릭된 아이템의 위치를 이용하여 데이터인 문자열을 Toast로 출력
             //Toast.makeText(mContext, "test", Toast.LENGTH_SHORT).show();
 
-
-            //file = new File(path.get(position));
             file = new File(mAdapter_plm_filelist.getItem(position).getFullPath());
 
-            //Log.d(LOG_TAG, "onListItemClick   path.get(position) : " + path.get(position));
-            Log.d(LOG_TAG, "onListItemClick file.getPath() : " + file.getPath());
-            Log.d(LOG_TAG, "---------------------------------------------- " );
+            Log.d(LOG_TAG, "onListItemClick position " + position + ", file.getPath() : " + file.getPath());
 
             if (file.isDirectory()) {
                 if (file.canRead()) {
@@ -171,6 +171,8 @@ public class Frag_plm_filelist extends Fragment {
                             }).show();
                 }
             } else {
+
+
                 Paint paint = new Paint();
 
                 //if(false == mPLM_DB.isExistCheck( mCurrentDbIndex, file.getPath() ) ) {
@@ -178,23 +180,23 @@ public class Frag_plm_filelist extends Fragment {
                     paint.setColor(R.color.colorPrimary);
                     paint.setAlpha(40);
                     mFilelist.add(file.getPath());
-                } else {
+                    Log.d(LOG_TAG, "selected item position " + position + ", file name " + file.getPath() + " is selected");
+                    mAdapter_plm_filelist.setSelectionForIndex(position, true);
+                }
+                else {
                     paint.setColor(Color.WHITE);
                     paint.setAlpha(0);
                     if(mFilelist.size() > 0) {
                         int idx = FileUtility.getIndexFromArrayList(mFilelist, file.getPath());
                         mFilelist.remove(idx);
+                        Log.d(LOG_TAG, "selected item position " + position + ", file name " + file.getPath() + " is un-selected");
+                        mAdapter_plm_filelist.setSelectionForIndex(position, false);
                     }
                 }
-
                 view.setBackgroundColor(paint.getColor());
-//                view.setBackgroundColor(mContext.getResources().getColor(R.color.colorPrimary));
-
             }
-
         }
     };
-
 
     View.OnTouchListener mBtnOnTouchistener = new View.OnTouchListener() {
 
@@ -212,22 +214,32 @@ public class Frag_plm_filelist extends Fragment {
                 case R.id.btn_plm_add:
                     switch (event.getAction()) {
                         case MotionEvent.ACTION_DOWN: {
+
                             ImageButton img_btn = (ImageButton) v;
                             img_btn.setColorFilter(new ColorMatrixColorFilter(Constants.NEGATIVE));
 
-                            mPLM_DB.addFilesToPlaylist(Constants.mCurrentPlaylistIdx, Constants.newPlaylistName, mFilelist);
+                            /*
+                            int numOfInsertedFile = 0;
+                            numOfInsertedFile = DataBases.mPLM_DB.addFilesToPlaylist(Valueable_Util.getTempPlaylistIdx(), Valueable_Util.getTempPlaylistName(), mFilelist);
 
                             Log.d(LOG_TAG, "Add files number of files " + mFilelist.size());
                             for(int i = 0; i < mFilelist.size(); i++) {
                                 Log.d(LOG_TAG, "Add files : " + mFilelist.get(i));
                             }
 
-                            Toast.makeText(mContext, "Add " + mFilelist.size() + " files. \n" +
-                                    "Total " + mPLM_DB.getNumOfItemsInPlaylist(Constants.mCurrentPlaylistIdx) + " files in playlist.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(mContext, "Add " + numOfInsertedFile + " files. \n" +
+                                    "Total " + DataBases.mPLM_DB.getNumOfItemsInPlaylist(Valueable_Util.getTempPlaylistIdx()) + " files in playlist.", Toast.LENGTH_SHORT).show();
 
                             //mAdapter_plm_filelist.notifyDataSetChanged();
-                            mFilelist = new ArrayList<String>();
+                            //mFilelist = new ArrayList<String>();
                             lv_ObjectList.setAdapter(mAdapter_plm_filelist);
+
+                            Valueable_Util.setCurrentPlaylistIdx(Valueable_Util.getTempPlaylistIdx());
+                            Valueable_Util.setCurrentPlaylistName(Valueable_Util.getTempPlaylistName());
+                            Valueable_Util.setCurrentPlayingPosition((int)0); // player의 play filelist 가 초기화 되기 때문에 0 으로 셋팅.
+                            Constants.ChangeFragMainFileList = true;
+                            */
+                            addFilesToPlaylist();
                            break;
                         }
 
@@ -275,14 +287,22 @@ public class Frag_plm_filelist extends Fragment {
                         case MotionEvent.ACTION_DOWN: {
                             ImageButton img_btn = (ImageButton) v;
                             img_btn.setColorFilter(new ColorMatrixColorFilter(Constants.NEGATIVE));
-
                             break;
                         }
 
                         case MotionEvent.ACTION_UP: {
                             ImageButton img_btn = (ImageButton) v;
                             img_btn.clearColorFilter();
+                            Log.d(LOG_TAG, "btn_plm_done ACTION_UP");
+                            /*
+                            Valueable_Util.setCurrentPlaylistIdx(Valueable_Util.getTempPlaylistIdx());
+                            Valueable_Util.setCurrentPlaylistName(Valueable_Util.getTempPlaylistName());
+                            Valueable_Util.setCurrentPlayingPosition((int)0); // player의 play filelist 가 초기화 되기 때문에 0 으로 셋팅.
+                            Constants.ChangeFragMainFileList = true;
+                            */
+                            addFilesToPlaylist();
                             ((FileSearchActivity)getActivity()).finishFragment();
+                            ((FileSearchActivity)getActivity()).finish();
                             // finish activity 하고 Main player 로 복귀하는 코드도 추가할 것
                             break;
                         }
@@ -292,4 +312,27 @@ public class Frag_plm_filelist extends Fragment {
             return true;
         }
     };
+
+    void addFilesToPlaylist() {
+
+        int numOfInsertedFile = 0;
+        numOfInsertedFile = DataBases.mPLM_DB.addFilesToPlaylist(Valueable_Util.getTempPlaylistIdx(), Valueable_Util.getTempPlaylistName(), mFilelist);
+
+        Log.d(LOG_TAG, "Add files number of files " + mFilelist.size());
+        for(int i = 0; i < mFilelist.size(); i++) {
+            Log.d(LOG_TAG, "Add files : " + mFilelist.get(i));
+        }
+
+        Toast.makeText(mContext, "Add " + numOfInsertedFile + " files. \n" +
+                "Total " + DataBases.mPLM_DB.getNumOfItemsInPlaylist(Valueable_Util.getTempPlaylistIdx()) + " files in playlist.", Toast.LENGTH_SHORT).show();
+
+        //mAdapter_plm_filelist.notifyDataSetChanged();
+        //mFilelist = new ArrayList<String>();
+        lv_ObjectList.setAdapter(mAdapter_plm_filelist);
+
+        Valueable_Util.setCurrentPlaylistIdx(Valueable_Util.getTempPlaylistIdx());
+        Valueable_Util.setCurrentPlaylistName(Valueable_Util.getTempPlaylistName());
+        Valueable_Util.setCurrentPlayingPosition((int)0); // player의 play filelist 가 초기화 되기 때문에 0 으로 셋팅.
+        Constants.ChangeFragMainFileList = true;
+    }
 }

@@ -22,16 +22,12 @@ public class Frag_main_script extends Fragment {
 
     String LOG_TAG = "Frag_main_filelist";
     Context mContext;
-    public Playlist_manager_db mPLM_DB;
     public Adapter_Main_PlayList mAdapterMainPlayList;
     ListView listview_playList;
-    MediaPlayerController mMediaPlayerController;
 
-    public Frag_main_script(Context context, Playlist_manager_db db, MediaPlayerController mediaPlayerController) {
+    public Frag_main_script(Context context) {
         Log.d(LOG_TAG, "create Frag_main_shadowing fragment");
         mContext = context;
-        mPLM_DB = db;
-        mMediaPlayerController = mediaPlayerController;
     }
 
     @Override

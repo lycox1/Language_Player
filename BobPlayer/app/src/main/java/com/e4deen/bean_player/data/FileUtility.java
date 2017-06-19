@@ -1,7 +1,12 @@
 package com.e4deen.bean_player.data;
 
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
+
+import com.e4deen.bean_player.view.player_view.activity.MainActivity;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -22,6 +27,24 @@ public class FileUtility {
         File file = new File(path);
         return hasAudioFolderCheck(file);
     }
+    public static
+    boolean FolderWithMusic(String directoryPath){
+        Cursor cursor;
+        String selection;
+        String[] projection = {MediaStore.Audio.Media.IS_MUSIC};
+        Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+
+//Create query for searching media files in folder
+        selection = MediaStore.Audio.Media.DATA + " like " + "'%" + directoryPath + "/%'";
+        cursor = MainActivity.mContext.getContentResolver().query(uri, projection, selection, null, null);
+        if (cursor != null) {
+            boolean isDataPresent;
+            isDataPresent = cursor.moveToFirst();
+            return isDataPresent;
+        }
+        return false;
+    }
+
 
     public static boolean hasAudioFolderCheck(File file) {
         Log.d(LOG_TAG, "hasAudioFolderCheck file name " + file.getName() );
@@ -100,4 +123,5 @@ public class FileUtility {
         }
         return -1;
     }
+
 }

@@ -9,6 +9,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.e4deen.bean_player.data.Constants;
+import com.e4deen.bean_player.util.Valueable_Util;
+import com.e4deen.bean_player.view.player_view.data.BookMark;
 
 import java.util.ArrayList;
 
@@ -20,7 +22,7 @@ public class Playlist_manager_db {
 
     String LOG_TAG = "Bean_Playlist_manager_db";
     private static final String DATABASE_NAME = "playlist.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
     public static SQLiteDatabase mDB;
     private DatabaseHelper mDBHelper;
     private Context mCtx;
@@ -34,44 +36,96 @@ public class Playlist_manager_db {
     public Playlist_manager_db open() throws SQLException {
         Log.d(LOG_TAG, "database open()");
         mDBHelper = new DatabaseHelper(mCtx, DATABASE_NAME, null, DATABASE_VERSION);
+
         mDB = mDBHelper.getWritableDatabase();
-
-        Log.d(LOG_TAG, "database open() test ");
-
+        //mDB.execSQL("delete from " + DataBases.CreateDB._TABLENAME);
         // for test
         //mDB.execSQL("DROP TABLE IF EXISTS "+DataBases.CreateDB._TABLENAME);
-        //mDB.execSQL(DataBases.CreateDB._CREATE);
+        //mDB.execSQL(DataBases.CreateDB._CREATE_PLAYLIST_DB);
 
         Cursor mCursor = mDB.query(DataBases.CreateDB._TABLENAME, null, null, null, null, null, null);
         Log.d(LOG_TAG, "database open() test " + mCursor.getCount());
         return this;
     }
 
+    public void deleteAll() {
+        mDB.delete(DataBases.CreateDB._TABLENAME, null, null);
+    }
+
 
     public void close(){
+       Log.d(LOG_TAG, "close() db");
+
         mDB.close();
     }
 
-    public boolean addFilesToPlaylist(int index, String playlistName, ArrayList<String> playlist) {
+    public int addFilesToPlaylist(int index, String playlistName, ArrayList<String> playlist) {
+
+        ArrayList<String> insert_playlist = new ArrayList<String>();
 
         for(int i =0; i < playlist.size(); i++) {
+            Cursor mCursor = mDB.query(DataBases.CreateDB._TABLENAME, null, DataBases.CreateDB.PLAYLIST_IDX + "=? AND " +
+                                                                            DataBases.CreateDB.PLAYLIST_NAME + "=? AND " +
+                                                                            DataBases.CreateDB.FILE_PATH + "=? AND " +
+                                                                            DataBases.CreateDB.PROGRESS + "=?",
+                    new String[] { String.valueOf(index), playlistName, playlist.get(i), "0" },
+                    null, null, null);
+            Log.d(LOG_TAG, "addFilesToPlaylist playlist loop " + i + ", mCursor.getCount() " + mCursor.getCount());
+            if ( mCursor.getCount() == 0 ) {
+                insert_playlist.add(playlist.get(i));
+            }
+        }
+/*
+        Cursor mCursor = mDB.query(DataBases.CreateDB._TABLENAME, null, DataBases.CreateDB.PLAYLIST_IDX + "=?",
+                new String[] { String.valueOf(index)},
+                null, null, null);
+        mCursor.moveToFirst();
+        for(int i = 0; i< mCursor.getCount(); i++) {
+            Log.d(LOG_TAG, "addFilesToPlaylist i " + i + ", FILE_PATH " + mCursor.getString(mCursor.getColumnIndex(DataBases.CreateDB.FILE_PATH)) );
+            mCursor.moveToNext();
+        }
+
+        Log.d(LOG_TAG, "addFilesToPlaylist playlist size " + playlist.size() + ", insert_playlist size " + insert_playlist.size());
+*/
+
+        for(int i =0; i < insert_playlist.size(); i++) {
             //Log.d(LOG_TAG, "insertColumn");
             ContentValues values = new ContentValues();
             values.put(DataBases.CreateDB.PLAYLIST_IDX, index);
             values.put(DataBases.CreateDB.PLAYLIST_NAME, playlistName);
-            values.put(DataBases.CreateDB.FILE_PATH, playlist.get(i));
+            values.put(DataBases.CreateDB.FILE_PATH, insert_playlist.get(i));
+            values.put(DataBases.CreateDB.PROGRESS, 0);
             //Log.d(LOG_TAG, "Add files in db : playlist.get(i) " + playlist.get(i));
             mDB.insert(DataBases.CreateDB._TABLENAME, null, values);
         }
 
-        return true;
+        return insert_playlist.size();
     }
 
+    public Cursor getPlaylistCursorByIndex(int index) {
+        Cursor mCursor = mDB.query(DataBases.CreateDB._TABLENAME, null, DataBases.CreateDB.PLAYLIST_IDX + "=? AND " + DataBases.CreateDB.PROGRESS + " =?",
+                new String[] {String.valueOf(index), "0" }, null, null, null);
+
+        //Cursor mCursor = mDB.rawQuery("SELECT * FROM " + DataBases.CreateDB._TABLENAME + " WHERE " + DataBases.CreateDB.PLAYLIST_IDX + "=" + playlist_index +
+//                                " AND " + DataBases.CreateDB.PROGRESS + "= 0", null);
+
+//        Cursor mCursor = mDB.query(DataBases.CreateDB._TABLENAME, null, "playlist_idx=? and progress=?" ,
+//                new String[] {"0", "0" }, null, null, null);
+
+//        Cursor mCursor = mDB.query(DataBases.CreateDB._TABLENAME, null, "progress=?" ,
+//                new String[] {"0"}, null, null, null);
+
+
+        //Cursor mCursor = mDB.query(DataBases.CreateDB._TABLENAME, null, DataBases.CreateDB.PLAYLIST_IDX + "=?" ,
+        //                           new String[] {"0" }, null, null, null);
+
+        return mCursor;
+    }
     public ArrayList<String> getFilelist(int playlist_index) {
 
         ArrayList<String> playlist = new ArrayList<String>();
+        Cursor mCursor = getPlaylistCursorByIndex(playlist_index);
 
-        Cursor mCursor = mDB.query(DataBases.CreateDB._TABLENAME, null, DataBases.CreateDB.PLAYLIST_IDX + "=" + playlist_index, null, null, null, null);
         if(mCursor.getCount() > 0) {
             Log.d(LOG_TAG, "Playlist exist. playlist index " + playlist_index + ", playlist count " + mCursor.getCount());
             mCursor.moveToFirst();
@@ -86,7 +140,7 @@ public class Playlist_manager_db {
         }
         return null;
     }
-
+/*
     public boolean isExistCheckItem( int playlist_index, String path ) {
         ArrayList<String> playlist = new ArrayList<String>();
 
@@ -107,19 +161,20 @@ public class Playlist_manager_db {
         Log.d(LOG_TAG, "isExistCheck() : " + path + " is not exist. In the playlist index " + playlist_index);
         return false;
     }
-
+*/
     public int getTotalItems() {
         Cursor mCursor = mDB.query(DataBases.CreateDB._TABLENAME, null, null, null, null, null, null);
         return mCursor.getCount();
     }
 
     public int getNumOfItemsInPlaylist(int index) {
-        Cursor mCursor = mDB.query(DataBases.CreateDB._TABLENAME, null, DataBases.CreateDB.PLAYLIST_IDX + "=" + index, null, null, null, null);
+        Cursor mCursor = getPlaylistCursorByIndex(index);
         return mCursor.getCount();
     }
 
     public int getLastIndex() {
-        Cursor mCursor = mDB.query(DataBases.CreateDB._TABLENAME, null, null, null, null, null, null);
+        Cursor mCursor = mDB.query(DataBases.CreateDB._TABLENAME, null, DataBases.CreateDB.PROGRESS + " = 0", null, null, null, null);
+
         if(mCursor.getCount() == 0)
             return 0;
 
@@ -140,16 +195,17 @@ public class Playlist_manager_db {
         return getLastIndex() + 1;
     }
 
-    public void setCurrentIndex(int index) {
-        sCurrentIndex = index;
-    }
+//    public void setCurrentIndex(int index) {
+//        sCurrentIndex = index;
+//    }
 
-    public int getsCurrentIndex() {
-        return sCurrentIndex;
-    }
+//    public int getsCurrentIndex() {
+//        return sCurrentIndex;
+//    }
 
-    public PlaylistTitlesClass getPlaylistTitleItem(int playlistIndex) {
-        Cursor mCursor = mDB.query(DataBases.CreateDB._TABLENAME, null, DataBases.CreateDB.PLAYLIST_IDX+ "=" + playlistIndex, null, null, null, null);
+    public PlaylistTitlesClass getPlaylistTitleItem(int playlistIndex) { // playlist index 는 1부터시작
+        Cursor mCursor = getPlaylistCursorByIndex(playlistIndex);
+
         if (mCursor.getCount() <= 0) {
             return null;
         }
@@ -246,6 +302,50 @@ public class Playlist_manager_db {
         return 0;
     }
 
+    public void updateBookmark(ArrayList<BookMark> bookmarkList) {
+
+        mDB.delete( DataBases.CreateDB._TABLENAME, DataBases.CreateDB.PLAYLIST_IDX + "=? AND " +
+                                                   DataBases.CreateDB.FILE_PATH + "=? AND " +
+                                                   DataBases.CreateDB.PROGRESS + " !=?",
+                    new String[] {String.valueOf( Valueable_Util.getCurrentPlaylistIdx() ), Valueable_Util.getCurrentPlayingFilePath(), "0" } );
+
+        for(int i = 0; i < bookmarkList.size(); i++) {
+            ContentValues values = new ContentValues();
+            values.put(DataBases.CreateDB.PLAYLIST_IDX, Valueable_Util.getCurrentPlaylistIdx());
+            values.put(DataBases.CreateDB.FILE_PATH, Valueable_Util.getCurrentPlayingFilePath());
+            values.put(DataBases.CreateDB.PLAYLIST_NAME, "bookmark");
+            values.put(DataBases.CreateDB.PROGRESS, bookmarkList.get(i).progress);
+
+            Log.d(LOG_TAG, "updateBookmark i " + i + " idx : " + Valueable_Util.getCurrentPlaylistIdx() +
+                                                     ", path " +  Valueable_Util.getCurrentPlayingFilePath() +
+                                                     ", progress " +  bookmarkList.get(i).progress
+            );
+            mDB.insert(DataBases.CreateDB._TABLENAME, null, values);
+        }
+    }
+
+    public ArrayList<BookMark> getBookmarkList() {
+
+        ArrayList<BookMark> bookmarkList = new ArrayList<BookMark>();;
+        Cursor mCursor = mDB.query(DataBases.CreateDB._TABLENAME, null, DataBases.CreateDB.PLAYLIST_IDX + "=? AND " +
+                        DataBases.CreateDB.FILE_PATH + "=? AND " +
+                        DataBases.CreateDB.PROGRESS + " !=?",
+                new String[] { String.valueOf(Valueable_Util.getCurrentPlaylistIdx()), Valueable_Util.getCurrentPlayingFilePath(), "0" },
+                null, null, null);
+
+        mCursor.moveToFirst();
+        Log.d(LOG_TAG, "getBookmarkList mCursor size " + mCursor.getCount() );
+
+        for(int i = 0; i < mCursor.getCount(); i++) {
+            BookMark bookMark = new BookMark();
+            bookMark.progress = mCursor.getInt(mCursor.getColumnIndex(DataBases.CreateDB.PROGRESS));
+            bookmarkList.add(bookMark);
+            mCursor.moveToNext();
+            Log.d(LOG_TAG, "getBookmarkList i " + i + " , progress " + bookMark.progress );
+        }
+
+        return bookmarkList;
+    }
 /*
     public long insertColumn(String name, String contact, String email) {
         Log.d(LOG_TAG, "insertColumn");
@@ -315,7 +415,7 @@ public class Playlist_manager_db {
         @Override
         public void onCreate(SQLiteDatabase db) {
             Log.d(LOG_TAG, "database onCreate()");
-            db.execSQL(DataBases.CreateDB._CREATE);
+            db.execSQL(DataBases.CreateDB._CREATE_PLAYLIST_DB);
 
         }
 

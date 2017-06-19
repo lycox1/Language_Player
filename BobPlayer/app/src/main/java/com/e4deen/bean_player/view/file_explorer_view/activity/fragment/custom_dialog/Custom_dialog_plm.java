@@ -7,6 +7,7 @@ package com.e4deen.bean_player.view.file_explorer_view.activity.fragment.custom_
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.renderscript.Sampler;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -17,7 +18,9 @@ import android.widget.Toast;
 
 import com.e4deen.bean_player.R;
 import com.e4deen.bean_player.data.Constants;
+import com.e4deen.bean_player.db.DataBases;
 import com.e4deen.bean_player.db.Playlist_manager_db;
+import com.e4deen.bean_player.util.Valueable_Util;
 import com.e4deen.bean_player.view.file_explorer_view.activity.FileSearchActivity;
 
 public class Custom_dialog_plm extends Dialog {
@@ -28,7 +31,7 @@ public class Custom_dialog_plm extends Dialog {
     private Button mCancelButton;
     private String mTitle;
     private String mContent;
-    public Playlist_manager_db mPLM_DB;
+    //public Playlist_manager_db mPLM_DB;
     public Context mContext;
     private View.OnClickListener mOkButtonListener;
     private View.OnClickListener mCencelButtonListener;
@@ -75,10 +78,10 @@ public class Custom_dialog_plm extends Dialog {
         this.mCencelButtonListener = cancelButtonListener;
     }
 */
-    public Custom_dialog_plm(Context context, Playlist_manager_db db) {
+    public Custom_dialog_plm(Context context) {
         super(context, android.R.style.Theme_Translucent_NoTitleBar);
         mContext = context;
-        mPLM_DB = db;
+        //mPLM_DB = db;
         this.mOkButtonListener = okListener;
         this.mCencelButtonListener = cancelListener;
     }
@@ -96,11 +99,11 @@ public class Custom_dialog_plm extends Dialog {
             if(0 == newPlaylistName.length()) {
                 Log.d(LOG_TAG,"ok button listener - null case ");
                 Toast.makeText(mContext, "Please input the new playlist name.", Toast.LENGTH_SHORT).show();
-            } else if ( Constants.FAIL == mPLM_DB.dupCheckPlaylistName(newPlaylistName)) {
+            } else if ( Constants.FAIL == DataBases.mPLM_DB.dupCheckPlaylistName(newPlaylistName)) {
                 Toast.makeText(mContext, newPlaylistName +" already exist. Please type another name.", Toast.LENGTH_SHORT).show();
             } else {
-                Constants.newPlaylistName = newPlaylistName;
-                Constants.mCurrentPlaylistIdx = mPLM_DB.getNewIndex();
+                Valueable_Util.setTempPlaylistName(newPlaylistName);
+                Valueable_Util.setTempPlaylistIdx(DataBases.mPLM_DB.getNewIndex());
                 ((FileSearchActivity)mContext).fragment_switch(Constants.IDX_PLM_FILELIST);
                 dismiss();
             }

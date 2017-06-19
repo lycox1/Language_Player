@@ -135,6 +135,7 @@
                         android:layout_centerVertical="true"
                         android:layout_marginRight="25dp"
                         android:text="00:00"/>
+
                 </RelativeLayout>
 
             </LinearLayout>
@@ -224,7 +225,7 @@
                             android:textSize="12sp"/>
 
                         <ImageButton
-                            android:id="@+id/btn_jump_period_up"
+                            android:id="@+id/btn_seek_time_up"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignBottom="@+id/btn_speed_up"
@@ -236,22 +237,22 @@
                             ads:srcCompat="@drawable/ic_speed_up_new"/>
 
                         <ImageView
-                            android:id="@+id/btn_jump_period_middle"
+                            android:id="@+id/btn_seek_middle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_alignStart="@+id/btn_jump_period_up"
-                            android:layout_below="@+id/btn_jump_period_up"
+                            android:layout_alignStart="@+id/btn_seek_time_up"
+                            android:layout_below="@+id/btn_seek_time_up"
                             android:layout_margin="0dp"
                             android:background="@android:color/background_light"
                             android:scaleType="fitXY"
                             ads:srcCompat="@drawable/ic_jump_middle"/>
 
                         <ImageButton
-                            android:id="@+id/btn_jump_period_down"
+                            android:id="@+id/btn_seek_time_down"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_alignStart="@+id/btn_jump_period_middle"
-                            android:layout_below="@+id/btn_jump_period_middle"
+                            android:layout_alignStart="@+id/btn_seek_middle"
+                            android:layout_below="@+id/btn_seek_middle"
                             android:layout_margin="0dp"
                             android:background="@android:color/background_light"
                             android:scaleType="fitXY"
@@ -262,7 +263,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignBottom="@+id/tv_speed"
-                            android:layout_alignLeft="@+id/btn_jump_period_up"
+                            android:layout_alignLeft="@+id/btn_seek_time_up"
                             android:layout_marginLeft="3dp"
                             android:text="ff/rew"
                             android:textColor="#777777"
@@ -302,7 +303,7 @@
                         android:layout_weight="0.35">
 
                         <ImageButton
-                            android:id="@+id/btn_rew"
+                            android:id="@+id/btn_seek_rew"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentLeft="true"
@@ -315,16 +316,16 @@
                             ads:srcCompat="@drawable/ic_rew_new2"/>
 
                         <ImageButton
-                            android:id="@+id/btn_ff"
+                            android:id="@+id/btn_seek_ff"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_alignBottom="@+id/btn_rew"
+                            android:layout_alignBottom="@+id/btn_seek_rew"
                             android:layout_alignParentRight="false"
                             android:layout_alignParentTop="false"
                             android:layout_centerVertical="false"
                             android:layout_marginLeft="5dp"
                             android:layout_marginTop="10dp"
-                            android:layout_toRightOf="@+id/btn_rew"
+                            android:layout_toRightOf="@+id/btn_seek_rew"
                             android:background="@android:color/background_light"
                             android:scaleType="fitXY"
                             ads:srcCompat="@drawable/ic_ff_new2"/>
@@ -364,6 +365,15 @@
                         android:layout_weight="0.65">
 
                         <ImageButton
+                            android:id="@+id/btn_one_repeat"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignLeft="@+id/btn_set_repeat_period"
+                            android:layout_alignParentLeft="false"
+                            android:background="@android:color/white"
+                            ads:srcCompat="@drawable/ic_repeat"/>
+
+                        <ImageButton
                             android:id="@+id/btn_set_repeat_period"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -380,16 +390,11 @@
                             android:id="@+id/btn_set_bookmark"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_alignBottom="@+id/btn_set_repeat_period"
-                            android:layout_alignParentLeft="false"
-                            android:layout_alignParentRight="false"
-                            android:layout_alignParentTop="false"
                             android:layout_marginLeft="5dp"
-                            android:layout_marginTop="10dp"
-                            android:layout_toRightOf="@+id/btn_set_repeat_period"
                             android:background="@android:color/background_light"
-                            android:elevation="1dp"
-                            ads:srcCompat="@drawable/ic_bookmark_new"/>
+                            ads:srcCompat="@drawable/ic_bookmark_new"
+                            android:layout_alignTop="@+id/btn_set_repeat_period"
+                            android:layout_toEndOf="@+id/btn_set_repeat_period"/>
 
                     </RelativeLayout>
 

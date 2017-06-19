@@ -15,8 +15,10 @@ import android.widget.ListView;
 
 import com.e4deen.bean_player.R;
 import com.e4deen.bean_player.data.Constants;
+import com.e4deen.bean_player.db.DataBases;
 import com.e4deen.bean_player.db.PlaylistTitlesClass;
 import com.e4deen.bean_player.db.Playlist_manager_db;
+import com.e4deen.bean_player.util.Valueable_Util;
 import com.e4deen.bean_player.util.Vibe;
 import com.e4deen.bean_player.view.file_explorer_view.activity.FileSearchActivity;
 import com.e4deen.bean_player.view.file_explorer_view.activity.fragment.custom_dialog.Custom_dialog_plm;
@@ -29,17 +31,18 @@ import com.e4deen.bean_player.view.file_explorer_view.adapter.Adapter_plm_playli
 public class Frag_plm_playlist extends Fragment {
 
     Context mContext;
-    String LOG_TAG = "Frag_plm_filelist";
+    String LOG_TAG = "Bean_Player_Frag_plm_PlayList";
     ListView lv_plm_playlist;
     Adapter_plm_playlist mAdapter_plm_playlist;
-    public Playlist_manager_db mPLM_DB;
+    //public Playlist_manager_db mPLM_DB;
     int mTestCount = 0;
     public Custom_dialog_plm mCustomDialogPLM;
     View rootView;
+//    int mSelectedPosition = 0;
 
-    public Frag_plm_playlist(Context context, Playlist_manager_db db) {
+    public Frag_plm_playlist(Context context) {
         mContext = context;
-        mPLM_DB = db;
+        //mPLM_DB = db;
     }
 
     @Override
@@ -49,24 +52,25 @@ public class Frag_plm_playlist extends Fragment {
         rootView = inflater.inflate(R.layout.frag_plm_playlist, container, false);
 
         lv_plm_playlist = (ListView) rootView.findViewById(R.id.lv_plm_playlist);
-        mAdapter_plm_playlist = new Adapter_plm_playlist(mPLM_DB, mContext);
+        mAdapter_plm_playlist = new Adapter_plm_playlist(mContext);
 
         rootView.findViewById(R.id.btn_plm_add_new_playlist).setOnTouchListener(mBtnOnTouchistener);
 
-        int numOfPlaylist = mPLM_DB.getLastIndex();
+        int numOfPlaylist = DataBases.mPLM_DB.getLastIndex();
         PlaylistTitlesClass playlistTitle;
 
-        int total_num = mPLM_DB.getTotalItems();
-        int total_items = mPLM_DB.getTotalItems();
+        int total_num = DataBases.mPLM_DB.getTotalItems();
+        int total_items = DataBases.mPLM_DB.getTotalItems();
         Log.d(LOG_TAG, "lsw onCreateView numOfPlaylist " + numOfPlaylist);
         Log.d(LOG_TAG, "lsw onCreateView total_num " + total_num + ", total_items " + total_items);
 
         for(int i=1; i <= numOfPlaylist; i++) {
-            playlistTitle = mPLM_DB.getPlaylistTitleItem(i);
+            playlistTitle = DataBases.mPLM_DB.getPlaylistTitleItem(i);
             Log.d(LOG_TAG, "lsw onCreateView i " + i + " , name " + playlistTitle.name);
             mAdapter_plm_playlist.addItem(playlistTitle);
         }
 
+//        mSelectedPosition = 0;
         lv_plm_playlist.setAdapter(mAdapter_plm_playlist);
         lv_plm_playlist.setOnItemClickListener(listener);
 
@@ -87,11 +91,12 @@ public class Frag_plm_playlist extends Fragment {
 
             Log.d(LOG_TAG, "onListItemClick position" + position + ", id " + id);
 
+//            mSelectedPosition = position;
             PlaylistTitlesClass playlist = mAdapter_plm_playlist.getItem(position);
-            Constants.mCurrentPlaylistIdx = playlist.playlistIndex;
-            Constants.newPlaylistName = playlist.name;
-            ((FileSearchActivity)mContext).fragment_switch(Constants.IDX_PLM_PLAYLIST_FILES);
+            Valueable_Util.setTempPlaylistIdx(playlist.playlistIndex);
+            //Valueable_Util.setCurrentPlaylistName(playlist.name);
 
+            ((FileSearchActivity)mContext).fragment_switch(Constants.IDX_PLM_PLAYLIST_FILES);
         }
 
     };
@@ -125,7 +130,7 @@ public class Frag_plm_playlist extends Fragment {
                             //((FileSearchActivity)getActivity()).fragment_switch(Constants.IDX_PLM_FILELIST);
 
                             //mCustomDialogPLM = new Custom_dialog_plm(mContext,okListener, cancelListener);
-                            mCustomDialogPLM = new Custom_dialog_plm(mContext, mPLM_DB);
+                            mCustomDialogPLM = new Custom_dialog_plm(mContext);
                             mCustomDialogPLM.show();
                             break;
                         }

@@ -4,19 +4,26 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.ColorMatrixColorFilter;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.e4deen.bean_player.R;
 import com.e4deen.bean_player.data.Constants;
+import com.e4deen.bean_player.util.Valueable_Util;
+import com.e4deen.bean_player.view.player_view.activity.MainActivity;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -27,9 +34,13 @@ public class MediaPlayerController {
     static String LOG_TAG = "Jog_Player_MediaPlayerController";
     final int E_SUCCESS = 1;
     final int E_ERROR = 0;
+
+    public static MediaPlayerController sController;
+
     String playFile = null;
     SeekBar mSeekBar;
     TextView mDurationTextView, mCurrentPositionTextView, mTextview_playback_speed;
+    public boolean mMediaPlayerInitComplete = false;
 
     static final int COMMAND_CONNECT= 0;
     static final int COMMAND_PLAY = 1;
@@ -56,16 +67,26 @@ public class MediaPlayerController {
     static final int COMMAND_SET_RIGHT_PLAYING_FILE_VOL = 22;
     static final int COMMAND_SET_LOOPBACK_MASTER_VOL = 23;
     static final int COMMNAD_SET_PLAYING_FILE_MASTER_VOL = 24;
+    static final int COMMAND_SET_PERIOD_REPEAT = 25;
 
+    static final int COMMAND_ON_PLAYING_COMPLETE = 97;
+    static final int COMMAND_MEDIAPLAYER_READY_COMPLETE = 98;
     static final int COMMAND_DISCONNECT = 99;
+
+    public static final int HANDLER_DRAW_BOOKMARK = 0;
 
     Context mContext;
     private Messenger mRemote;
     int duration, timeElapsed=0;
     Handler durationHandler = new Handler();
+    OnPlayingCompleteCb mOnPlayingCompleteCb;
+    OnDrawBookmarkCb mOnDrawBookmarkCb;
+    Handler mMainHandler;
 
-    public MediaPlayerController(Context context) {
+    public MediaPlayerController(Context context, Handler handler) {
+        Log.d(LOG_TAG, "MediaPlayerController construct");
         mContext = context;
+        mMainHandler = handler;
         playerInit();
     }
 
@@ -73,10 +94,35 @@ public class MediaPlayerController {
         mSeekBar = seekBar; mCurrentPositionTextView = currentPostion; mDurationTextView =  duration; mTextview_playback_speed = textview_playback_speed;
     }
 
+    //----------------------------- OnPlayingCompleteCb --------------------------------------------/
+    public interface OnPlayingCompleteCb { void onPlayingCompleteCb(); }
+
+    public void setOnPlayingCompleteCb(OnPlayingCompleteCb cb) {
+        mOnPlayingCompleteCb = cb;
+    }
+
+    public void onPlayingComplete() {
+        mOnPlayingCompleteCb.onPlayingCompleteCb();
+    }
+    //---------------------------------------------------------------------------------------------/
+    //----------------------------- OnDrawBookmarkCb ----------------------------------------------/
+    public interface OnDrawBookmarkCb { void onDrawBookmarkCb(); }
+
+    public void setOnDrawBookmarkCb(OnDrawBookmarkCb cb) {
+        mOnDrawBookmarkCb = cb;
+    }
+
+    public void onOnDrawBookmark() {
+        mOnDrawBookmarkCb.onDrawBookmarkCb();
+    }
+    //---------------------------------------------------------------------------------------------/
+
     private ServiceConnection mConnection = new ServiceConnection() {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.d(LOG_TAG, "onServiceConnected");
+
             // service 하고 연결될때
             mRemote = new Messenger(service);
 
@@ -95,6 +141,7 @@ public class MediaPlayerController {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
+            Log.d(LOG_TAG, "onServiceDisconnected");
             // service 하고 연결이 끊길때
             mRemote = null;
         }
@@ -121,9 +168,9 @@ public class MediaPlayerController {
                     mCurrentPositionTextView.setText("00:00");
                     mDurationTextView.setText(dateFormatted);
 
-//                    duration = (int)TimeUnit.MILLISECONDS.toSeconds( Long.parseLong((String)msg.obj) );
                     duration = (int) Long.parseLong((String)msg.obj);
                     mSeekBar.setMax(duration);
+                    mMainHandler.sendEmptyMessage(HANDLER_DRAW_BOOKMARK);
 //                    Log.d(LOG_TAG, "handleMessage COMMAND_GET_DURATION " + (String) msg.obj + ", duration " + duration + ", dateFormatted " + dateFormatted);
                     break;
 
@@ -141,10 +188,19 @@ public class MediaPlayerController {
 
                 case MediaPlayerController.COMMAND_UPDATE_PLAYBACK_SPEED:  // 13
                     // update time scroll bar
-
                     mTextview_playback_speed.setText((String)msg.obj);
                     break;
 
+                case MediaPlayerController.COMMAND_MEDIAPLAYER_READY_COMPLETE:  // 13
+                    Log.d(LOG_TAG, "MediaPlayer init complete()");
+                    mMediaPlayerInitComplete = true;
+                    break;
+
+                case MediaPlayerController.COMMAND_ON_PLAYING_COMPLETE:  // 13
+                    Log.d(LOG_TAG, "COMMAND_ON_PLAYING_COMPLETE IS CALLED");
+                    onPlayingComplete();
+
+                    break;
             }
         }
     }
@@ -156,9 +212,14 @@ public class MediaPlayerController {
             msg.what = command;
 //            Log.d(LOG_TAG, "sendMessage from MediaPlayerController to MediaPlayerService command : " + command);
 
+            ArrayList<String> listArgs = new ArrayList<String>();
+
             for(String s: VarArgs) {
-                msg.obj = s;
+                listArgs.add(s);
+                //Log.d(LOG_TAG, "sendMessage from MediaPlayerController to MediaPlayerService command : " + command + ", arg : " + s);
             }
+
+            msg.obj = listArgs;
 
             try {
                 mRemote.send(msg);
@@ -172,7 +233,7 @@ public class MediaPlayerController {
 
 
     public int playerInit()  {
-
+        Log.d(LOG_TAG, "playerInit() ");
         // service 연결 시도
         Intent serviceIntent = new Intent(mContext, MediaPlayerService.class);
         mContext.bindService(serviceIntent, mConnection, Context.BIND_AUTO_CREATE);
@@ -180,28 +241,54 @@ public class MediaPlayerController {
         return E_SUCCESS;
     }
 
+    public int PlayerDestroy() {
+        Log.d(LOG_TAG, "PlayerDestroy() ");
+
+        mContext.unbindService(mConnection);
+        return E_SUCCESS;
+    }
+
+
     public int setPlayFile(String fullPath)  {
         playFile = fullPath;
+        Constants.FILE_READY_STATUS = Constants.FILE_READY;
         Log.d(LOG_TAG, "setPlayFile fullPath = " + playFile);
+        Valueable_Util.setCurrentPlayingFilePath(fullPath);
+        //onOnDrawBookmark();
         sendMessage(COMMAND_SET_FILE, playFile);
+        sendMessage(COMMAND_GET_DURATION);
+
+        if(Constants.OneRepeatMode == true) {
+            Constants.OneRepeatMode=false;
+            ((MainActivity)mContext).btn_one_repeat.clearColorFilter();
+            setRepeat();
+        }
         return E_SUCCESS;
     }
 
     public int startPlay() {
+        Constants.PLAYER_STATUS = Constants.PLAYER_STATUS_PLAY;
+        //mContext.findViewById(R.id.iv_tab_file_list)
+        //((ImageButton)((AppCompatActivity)mContext).findViewById(R.id.btn_play_pause_id)).setImageResource(R.drawable.btn_play);
         sendMessage(COMMAND_PLAY);
         updateSeekBar();
         return E_SUCCESS;
     }
 
     public int pausePlay() {
+        Constants.PLAYER_STATUS = Constants.PLAYER_STATUS_PAUSE;
+        //(ImageButton)((AppCompatActivity)mContext).findViewById(R.id.btn_play_pause_id).callOnClick();
+
         sendMessage(COMMAND_PAUSE);
         return E_SUCCESS;
     }
 
     public int stopPlay() {
         // service 연결 해제
+        Log.d(LOG_TAG, "stopPlay()");
+        Constants.PLAYER_STATUS = Constants.PLAYER_STATUS_STOP;
         sendMessage(COMMAND_STOP);
-        mContext.unbindService(mConnection);
+        //mContext.unbindService(mConnection);
         return E_SUCCESS;
     }
 
@@ -256,6 +343,15 @@ public class MediaPlayerController {
     public int setRepeat() {
         Log.d(LOG_TAG, "setRepeat ");
         sendMessage(COMMAND_SET_REPEAT);
+
+        return E_SUCCESS;
+    }
+
+    public int setPeroidRepeat(int repeatFrom, int repeatTo) {
+        Log.d(LOG_TAG, "setRepeat repeatFrom " + Integer.toString(repeatFrom) + ", repeatTo " + Integer.toString(repeatTo));
+        String[] args = {Integer.toString(repeatFrom), Integer.toString(repeatTo)};
+        //String[] args = {"aaa", "bbb"};
+        sendMessage(COMMAND_SET_PERIOD_REPEAT, args);
 
         return E_SUCCESS;
     }

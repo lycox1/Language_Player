@@ -29,8 +29,6 @@ public class Frag_main_shadowing extends Fragment {
 
     String LOG_TAG = "Frag_main_tab_shadowing";
     Context mContext;
-    public Playlist_manager_db mPLM_DB;
-    MediaPlayerController mMediaPlayerController;
     ImageButton mBtnMyVoiceOnOff, mBtnPlayingFileOnOff;
     ImageView mIvMyVoice, mIvPlayingFile;
     SeekBar mSeekbarMyVoice, mSeekbarPlayingFile;
@@ -38,11 +36,9 @@ public class Frag_main_shadowing extends Fragment {
     int mLeftVolume = 10;
     int mRightVolume = 10;
 
-    public Frag_main_shadowing(Context context, Playlist_manager_db db, MediaPlayerController mediaPlayerController) {
+    public Frag_main_shadowing(Context context) {
         Log.d(LOG_TAG, "create Frag_main_shadowing fragment");
         mContext = context;
-        mPLM_DB = db;
-        mMediaPlayerController = mediaPlayerController;
     }
 
     @Override
@@ -92,13 +88,13 @@ public class Frag_main_shadowing extends Fragment {
                         mBtnMyVoiceOnOff.setImageResource(R.drawable.btn_circle_onoff_on);
                         mIvMyVoice.setImageResource(R.drawable.iv_my_voice_on);
 
-                        mMediaPlayerController.startLoopback();
+                        MediaPlayerController.sController.startLoopback();
                     } else {
                         Constants.SHADOWING_MY_VOICE_ONOFF_STATE = Constants.STATE_OFF;
                         mBtnMyVoiceOnOff.setImageResource(R.drawable.btn_circle_onoff_off);
                         mIvMyVoice.setImageResource(R.drawable.iv_my_voice_off);
 
-                        mMediaPlayerController.stopLoopback();
+                        MediaPlayerController.sController.stopLoopback();
                     }
                     break;
 
@@ -110,8 +106,8 @@ public class Frag_main_shadowing extends Fragment {
 
                         if(Constants.PLAYER_STATUS == Constants.PLAYER_STATUS_PLAY) {
                             Log.d(LOG_TAG, "playingFile switch ON mRightVolume " + mRightVolume + ", mLeftVolume " + mLeftVolume);
-                            mMediaPlayerController.setPlayingFileRightVol(mRightVolume);
-                            mMediaPlayerController.setPlayingFileLeftVol(mLeftVolume);
+                            MediaPlayerController.sController.setPlayingFileRightVol(mRightVolume);
+                            MediaPlayerController.sController.setPlayingFileLeftVol(mLeftVolume);
                         }
                     } else {
                         Constants.SHADOWING_PLAYING_FILE_ONOFF_STATE = Constants.STATE_OFF;
@@ -120,9 +116,9 @@ public class Frag_main_shadowing extends Fragment {
 
                         if(Constants.PLAYER_STATUS == Constants.PLAYER_STATUS_PLAY) {
                             Log.d(LOG_TAG, "playingFile switch OFF mRightVolume " + mRightVolume + ", mLeftVolume " + mLeftVolume);
-                            //mMediaPlayerController.setPlayingFileMasterVol(VolumeUtil.MIN_VOLUME_IDX);
-                            mMediaPlayerController.setPlayingFileLeftVol(VolumeUtil.MIN_VOLUME_IDX);
-                            mMediaPlayerController.setPlayingFileRightVol(VolumeUtil.MIN_VOLUME_IDX);
+                            //MediaPlayerController.sController.setPlayingFileMasterVol(VolumeUtil.MIN_VOLUME_IDX);
+                            MediaPlayerController.sController.setPlayingFileLeftVol(VolumeUtil.MIN_VOLUME_IDX);
+                            MediaPlayerController.sController.setPlayingFileRightVol(VolumeUtil.MIN_VOLUME_IDX);
                         }
                     }
                     break;
@@ -143,14 +139,14 @@ public class Frag_main_shadowing extends Fragment {
 
                 if(Constants.SHADOWING_MY_VOICE_ONOFF_STATE == Constants.STATE_ON) {
                     if(progress < 10) {
-                        mMediaPlayerController.setLoopbackLeftVol(VolumeUtil.MAX_VOLUME_IDX);
-                        mMediaPlayerController.setLoopbackRightVol(progress);
+                        MediaPlayerController.sController.setLoopbackLeftVol(VolumeUtil.MAX_VOLUME_IDX);
+                        MediaPlayerController.sController.setLoopbackRightVol(progress);
                     } else if (progress > 10) {
-                        mMediaPlayerController.setLoopbackLeftVol(VolumeUtil.MAX_VOLUME_IDX - (progress - VolumeUtil.MAX_VOLUME_IDX));
-                        mMediaPlayerController.setLoopbackRightVol(VolumeUtil.MAX_VOLUME_IDX);
+                        MediaPlayerController.sController.setLoopbackLeftVol(VolumeUtil.MAX_VOLUME_IDX - (progress - VolumeUtil.MAX_VOLUME_IDX));
+                        MediaPlayerController.sController.setLoopbackRightVol(VolumeUtil.MAX_VOLUME_IDX);
                     } else {
-                        mMediaPlayerController.setLoopbackLeftVol(VolumeUtil.MAX_VOLUME_IDX);
-                        mMediaPlayerController.setLoopbackRightVol(VolumeUtil.MAX_VOLUME_IDX);
+                        MediaPlayerController.sController.setLoopbackLeftVol(VolumeUtil.MAX_VOLUME_IDX);
+                        MediaPlayerController.sController.setLoopbackRightVol(VolumeUtil.MAX_VOLUME_IDX);
                     }
                 }
 
@@ -181,8 +177,8 @@ public class Frag_main_shadowing extends Fragment {
                         mRightVolume = VolumeUtil.MAX_VOLUME_IDX;
                     }
 
-                    mMediaPlayerController.setPlayingFileLeftVol(mLeftVolume);
-                    mMediaPlayerController.setPlayingFileRightVol(mRightVolume);
+                    MediaPlayerController.sController.setPlayingFileLeftVol(mLeftVolume);
+                    MediaPlayerController.sController.setPlayingFileRightVol(mRightVolume);
                 }
             }
         }
@@ -199,7 +195,7 @@ public class Frag_main_shadowing extends Fragment {
             Log.d(LOG_TAG, "onProgressChanged mSeekBarListenerMyVoiceMaster fromUser " + fromUser + ", progress " + progress);
             if(fromUser) {
                 Log.d(LOG_TAG, "onProgressChanged Constants.PLAYER_STATUS " + Constants.PLAYER_STATUS );
-                mMediaPlayerController.setLoopbackMasterVol(progress);
+                MediaPlayerController.sController.setLoopbackMasterVol(progress);
             }
         }
     };
@@ -214,7 +210,7 @@ public class Frag_main_shadowing extends Fragment {
             Log.d(LOG_TAG, "onProgressChanged mSeekBarListenerPlayingFileMaster fromUser " + fromUser + ", progress " + progress);
             if(fromUser) {
                 Log.d(LOG_TAG, "onProgressChanged Constants.PLAYER_STATUS " + Constants.PLAYER_STATUS );
-                mMediaPlayerController.setPlayingFileMasterVol(progress);
+                MediaPlayerController.sController.setPlayingFileMasterVol(progress);
             }
         }
     };

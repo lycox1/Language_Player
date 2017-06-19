@@ -16,17 +16,16 @@ public class DataBases {
         public static final String PLAYLIST_IDX = "playlist_idx";
         public static final String PLAYLIST_NAME = "playlist_name";
         public static final String FILE_PATH = "file_path";
+        public static final String PROGRESS = "progress";
         public static final String _TABLENAME = "playlist";
-        public static final String _CREATE =
+        public static final String _CREATE_PLAYLIST_DB =
                 "create table " + _TABLENAME + "("
                         + _ID + " integer primary key autoincrement, "
                         + PLAYLIST_IDX + " INTEGER, "
-                        + PLAYLIST_NAME + " text not null , "
-                        + FILE_PATH + " text not null );";
+                        + PLAYLIST_NAME + " text , "
+                        + FILE_PATH + " text not null , "
+                        + PROGRESS + " INTEGER );";
     }
 
-
-
+    public static Playlist_manager_db mPLM_DB;
 }
-
-

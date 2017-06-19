@@ -21,6 +21,7 @@ public class Lv_item_filelist {
     final int FILE_EXPLORER_OBJ_TYPE_FOLDER = 1;
     int objType;
     boolean isAudioFile = false;
+    boolean mSelected = false;
 
     String path, fileName, fullPath;
     File file = null;
@@ -77,6 +78,13 @@ public class Lv_item_filelist {
         return timeStamp;
     }
 
+    public void setSelection(boolean set) {
+        mSelected =  set;
+    }
+
+    public boolean getSelection() {
+        return mSelected;
+    }
 
     public static String getFileType(String url)
     {

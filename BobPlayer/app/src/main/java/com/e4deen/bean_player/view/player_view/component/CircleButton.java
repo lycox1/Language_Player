@@ -28,17 +28,17 @@ public class CircleButton extends RelativeLayout {
     int size = 0; // 휠 전체 사이즈 (가로 세로 대칭)
     double proportion_of_startButton = 0.381578; // 전체에서 start/pause 버튼의 비율. 정가운데를 0으로 놓은 비율
     int jog_drag_state, vibe_count = 0;
-    int old_deg, new_deg, unit_mSec = 0;
+    int old_deg, new_deg, unit_mSec, shiftTime = 0;
+    int backStepDeg = 0;
+    int backStepLevel = 30;
     double radToDegree = 180 / Math.PI;
-    MediaPlayerController mMediaPlayerController;
     Context mContext;
-    //Vibe vibe;
-    SeekBar seekBar;
     int mLayoutWidth, mLayoutHeight, mRotatorWidth, mRotatorHeight;
     private ImageView ivRotor;
     private Bitmap bmpRotorOn;
     int test = 0;
     int accum_Deg, accum_mSec;
+    boolean backStep = false;
     public TextView tv_ShiftTime;
     RelativeLayout RL_Circle;
 
@@ -78,11 +78,11 @@ public class CircleButton extends RelativeLayout {
         setUnitSec(4);
     }
 
-
+/*
     public void setMediaPlayerController(MediaPlayerController mediaPlayerController) {
         mMediaPlayerController = mediaPlayerController;
     }
-
+*/
     public void init() {
 
         //Log.d(LOG_TAG, "dialerHeight " + dialerHeight + ", dialerWidth " + dialerWidth + ", imageOriginal.getWidth() " + imageOriginal.getWidth() + ", imageOriginal.getHeight()" + imageOriginal.getHeight() );
@@ -225,11 +225,13 @@ public class CircleButton extends RelativeLayout {
                     break;
 */
                 case MotionEvent.ACTION_DOWN:
-
+                    accum_mSec = 0;
+                    backStep = false;
                     tv_ShiftTime = new TextView(mContext);
                     RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
                     params.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-                    params.addRule(RelativeLayout.CENTER_HORIZONTAL);
+                    //params.addRule(RelativeLayout.CENTER_HORIZONTAL);
+                    params.addRule(RelativeLayout.ALIGN_LEFT);
                     params.setMargins(0,0,0,0);
 
                     tv_ShiftTime.setLayoutParams(params);
@@ -245,7 +247,7 @@ public class CircleButton extends RelativeLayout {
 
                         //new_deg = degCalc(x, y);
                         new_deg = degCalc(event.getX(), event.getY());
-                        int shiftTime = getShifTime(old_deg, new_deg);
+                        shiftTime = getShifTime(old_deg, new_deg);
 
                         //vibe.vibration(80);
 
@@ -256,9 +258,9 @@ public class CircleButton extends RelativeLayout {
                         String text_shift_time;
 
                         if(accum_mSec >= 0) {
-                            text_shift_time = " >> FF :" + String.format("%.1f", (float)accum_mSec/1000.0f) + " Sec";
+                            text_shift_time = "               " + String.format("%.1f", (float)accum_mSec/1000.0f) + " Sec FF >>";
                         } else {
-                            text_shift_time = " << Rew :" + String.format("%.1f", (float)accum_mSec/1000.0f) + " Sec";
+                            text_shift_time = "<< Rew " + String.format("%.1f", (float)accum_mSec/1000.0f) + " Sec      ";
                         }
                         tv_ShiftTime.setText(text_shift_time);
 
@@ -266,9 +268,9 @@ public class CircleButton extends RelativeLayout {
                         if(Constants.FILE_READY_STATUS == Constants.FILE_READY) {
                             if (shiftTime < 0) {
                                 shiftTime = -shiftTime;
-                                mMediaPlayerController.rewPlay(shiftTime);
+                                MediaPlayerController.sController.rewPlay(shiftTime);
                             } else if (shiftTime >= 0) {
-                                mMediaPlayerController.ffPlay(shiftTime);
+                                MediaPlayerController.sController.ffPlay(shiftTime);
                             } else {
                                 Log.d(LOG_TAG, "MotionEvent.ACTION_MOVE same degree old_deg " + old_deg + ", new_deg " + new_deg);
                             }
@@ -285,7 +287,92 @@ public class CircleButton extends RelativeLayout {
                 case MotionEvent.ACTION_UP:
                     tv_ShiftTime.setText("");
                     Vibe.Vibe_Stop();
-                    accum_mSec = 0;
+                    backStep = true;
+
+                    if(shiftTime > 0) {
+                        backStepDeg = new_deg / backStepLevel;
+                    } else {
+                        backStepDeg = (360 - new_deg) / backStepLevel;
+                    }
+
+                    if(backStepDeg <= 0) {
+                        backStepDeg = 10;
+                    }
+/*
+                    Thread myThread = new Thread(new Runnable() {
+                        public void run() {
+                            while ( backStep == true) {
+                                try {
+                                    Log.d(LOG_TAG, "CircleButton backStepDeg " + backStepDeg + ", new_deg " + new_deg);
+                                    if(shiftTime > 0) {  // FF 에서 back 하는 경우
+                                        new_deg -= backStepDeg;
+                                        if(new_deg < 0) {
+                                            backStep = false;
+                                            new_deg = 0;
+                                        }
+                                        Matrix matrix=new Matrix();
+                                        ivRotor.setScaleType(ImageView.ScaleType.MATRIX);
+                                        matrix.postRotate((float) new_deg, mRotatorWidth/2, mRotatorHeight/2);
+                                        ivRotor.setImageMatrix(matrix);
+                                    } else {
+                                        new_deg += backStepDeg;
+                                        if(new_deg > 360) {
+                                            backStep = false;
+                                            new_deg = 0;
+                                        }
+                                        Matrix matrix=new Matrix();
+                                        ivRotor.setScaleType(ImageView.ScaleType.MATRIX);
+                                        matrix.postRotate((float) new_deg, mRotatorWidth/2, mRotatorHeight/2);
+                                        ivRotor.setImageMatrix(matrix);
+                                    }
+                                    Thread.sleep(1);
+                                } catch (Throwable t) {
+                                }
+                            }
+                        }
+                    });
+                    myThread.start();
+*/
+
+                    ((MainActivity) mContext).runOnUiThread(new Runnable()
+                     {
+                         @Override
+                         public void run()
+                         {
+                             while ( backStep == true) {
+                                 try {
+                                     Log.d(LOG_TAG, "CircleButton backStepDeg " + backStepDeg + ", new_deg " + new_deg);
+                                     if(shiftTime > 0) {  // FF 에서 back 하는 경우
+                                         new_deg -= backStepDeg;
+                                         if(new_deg < 0) {
+                                             backStep = false;
+                                             new_deg = 0;
+                                         }
+                                         Matrix matrix=new Matrix();
+                                         ivRotor.setScaleType(ImageView.ScaleType.MATRIX);
+                                         matrix.postRotate((float) new_deg, mRotatorWidth/2, mRotatorHeight/2);
+                                         ivRotor.setImageMatrix(matrix);
+                                     } else {
+                                         new_deg += backStepDeg;
+                                         if(new_deg > 360) {
+                                             backStep = false;
+                                             new_deg = 0;
+                                         }
+                                         Matrix matrix=new Matrix();
+                                         ivRotor.setScaleType(ImageView.ScaleType.MATRIX);
+                                         matrix.postRotate((float) new_deg, mRotatorWidth/2, mRotatorHeight/2);
+                                         ivRotor.setImageMatrix(matrix);
+                                     }
+
+                                     if(new_deg == 0) {
+                                         backStep = false;
+                                     }
+                                     Thread.sleep(3);
+                                 } catch (Throwable t) {
+                                 }
+                             }
+                         }
+                    });
                     break;
             }
             return true;

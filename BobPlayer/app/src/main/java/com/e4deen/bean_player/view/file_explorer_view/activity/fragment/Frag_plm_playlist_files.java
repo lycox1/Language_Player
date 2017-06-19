@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.content.Context;
 import android.graphics.ColorMatrixColorFilter;
 import android.os.Bundle;
+import android.renderscript.Sampler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -15,7 +16,10 @@ import android.widget.ListView;
 
 import com.e4deen.bean_player.R;
 import com.e4deen.bean_player.data.Constants;
+import com.e4deen.bean_player.db.DataBases;
+import com.e4deen.bean_player.db.PlaylistTitlesClass;
 import com.e4deen.bean_player.db.Playlist_manager_db;
+import com.e4deen.bean_player.util.Valueable_Util;
 import com.e4deen.bean_player.util.Vibe;
 import com.e4deen.bean_player.view.file_explorer_view.activity.FileSearchActivity;
 import com.e4deen.bean_player.view.file_explorer_view.activity.fragment.custom_dialog.Custom_dialog_plm;
@@ -34,15 +38,15 @@ public class Frag_plm_playlist_files extends Fragment {
     String LOG_TAG = "Frag_plm_playlist_files";
     ListView lv_plm_playlist_files;
     Adapter_plm_playlist_files mAdapter_plm_playlist_files;
-    public Playlist_manager_db mPLM_DB;
+    //public Playlist_manager_db mPLM_DB;
     int mTestCount = 0;
     public Custom_dialog_plm mCustomDialogPLM;
     //View rootView;
     ArrayList<String> mPlaylist;
 
-    public Frag_plm_playlist_files(Context context, Playlist_manager_db db) {
+    public Frag_plm_playlist_files(Context context) {
         mContext = context;
-        mPLM_DB = db;
+        //mPLM_DB = db;
     }
 
     @Override
@@ -65,15 +69,16 @@ public class Frag_plm_playlist_files extends Fragment {
         View rootView = inflater.inflate(R.layout.frag_plm_playlist_files, container, false);
 
         lv_plm_playlist_files = (ListView) rootView.findViewById(R.id.lv_plm_playlist_files);
-        mAdapter_plm_playlist_files = new Adapter_plm_playlist_files(mContext, mPLM_DB);
+        mAdapter_plm_playlist_files = new Adapter_plm_playlist_files(mContext);
 
         rootView.findViewById(R.id.btn_plm_playlist_files_add).setOnTouchListener(mBtnOnTouchistener);
         rootView.findViewById(R.id.btn_plm_playlist_files_back).setOnTouchListener(mBtnOnTouchistener);
         rootView.findViewById(R.id.btn_plm_playlist_files_done).setOnTouchListener(mBtnOnTouchistener);
 
+        int tempPlaylistIdx = Valueable_Util.getTempPlaylistIdx();
 
-        mPlaylist = mPLM_DB.getFilelist(Constants.mCurrentPlaylistIdx);
-        Log.d(LOG_TAG, "lsw onCreateView Frag_plm_playlist_files mCurrentPlaylistIdx" + Constants.mCurrentPlaylistIdx);
+        mPlaylist = DataBases.mPLM_DB.getFilelist(tempPlaylistIdx);
+        Log.d(LOG_TAG, "lsw onCreateView Frag_plm_playlist_files tempPlaylistIdx" + tempPlaylistIdx);
         Log.d(LOG_TAG, "lsw onCreateView mPlaylist size " + mPlaylist.size() );
 
         if(mPlaylist.size() == 0) {
@@ -221,6 +226,14 @@ public class Frag_plm_playlist_files extends Fragment {
                             Log.d(LOG_TAG, "Done Button Press and Released" );
                             ImageButton img_btn = (ImageButton) v;
                             img_btn.clearColorFilter();
+
+                            PlaylistTitlesClass playlistTitle;
+                            playlistTitle = DataBases.mPLM_DB.getPlaylistTitleItem(Valueable_Util.getTempPlaylistIdx());
+                            Valueable_Util.setCurrentPlaylistIdx(playlistTitle.playlistIndex);
+                            Valueable_Util.setCurrentPlaylistName(playlistTitle.name);
+                            Constants.ChangeFragMainFileList = true;
+
+                            Valueable_Util.setCurrentPlayingPosition((int)0); // player의 play filelist 가 초기화 되기 때문에 0 으로 셋팅.
                             ((FileSearchActivity)getActivity()).finishFragment();
                             ((FileSearchActivity)getActivity()).finish();
                             break;
