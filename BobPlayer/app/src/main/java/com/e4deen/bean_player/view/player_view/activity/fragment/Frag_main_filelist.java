@@ -31,7 +31,7 @@ import java.util.ArrayList;
 
 public class Frag_main_filelist extends Fragment {
 
-    String LOG_TAG = "Frag_main_filelist";
+    String LOG_TAG = "BeanPlayer_Frag_main_filelist";
     Context mContext;
     public Adapter_Main_PlayList mAdapterMainPlayList;
     ListView listview_playList;

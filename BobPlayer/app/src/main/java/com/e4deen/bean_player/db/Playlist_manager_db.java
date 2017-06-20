@@ -20,7 +20,7 @@ import java.util.ArrayList;
 
 public class Playlist_manager_db {
 
-    String LOG_TAG = "Bean_Playlist_manager_db";
+    String LOG_TAG = "BeanPlayer_Playlist_manager_db";
     private static final String DATABASE_NAME = "playlist.db";
     private static final int DATABASE_VERSION = 2;
     public static SQLiteDatabase mDB;

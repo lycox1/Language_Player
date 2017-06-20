@@ -9,7 +9,7 @@ import java.io.File;
  */
 public class Lv_Main_PlayList_Item {
 
-    static String LOG_TAG = "Jog_Player_FileList_Item";
+    static String LOG_TAG = "BeanPlayer_FileList_Item";
     final int E_SUCCESS = 1;
     final int E_ERROR = 0;
 

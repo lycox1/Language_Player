@@ -26,7 +26,7 @@ import java.util.ArrayList;
  */
 public class MediaPlayerService extends Service {
 
-    static String LOG_TAG = "Bean_Player_MediaPlayerService";
+    static String LOG_TAG = "BeanPlayer_MediaPlayerService";
     final int E_SUCCESS = 1;
     final int E_ERROR = 0;
     String playFile = null;

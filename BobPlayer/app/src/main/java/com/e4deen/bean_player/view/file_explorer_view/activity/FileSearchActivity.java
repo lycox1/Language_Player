@@ -23,7 +23,7 @@ import com.e4deen.bean_player.view.file_explorer_view.activity.fragment.Frag_plm
  * Created by user on 2016-12-18.
  */
 public class FileSearchActivity extends AppCompatActivity {
-    static String LOG_TAG = "Bean_PLM_Activity";
+    static String LOG_TAG = "BeanPlayer_PLM_Activity";
 
     Context mContext;
     Vibe mVibe;

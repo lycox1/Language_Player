@@ -18,18 +18,32 @@
         android:theme="@style/AppTheme" >
         <!--This meta-data tag is required to use Google Play Services.-->
         <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version"/>
-        <activity android:name="com.e4deen.bean_player.view.player_view.activity.MainActivity" android:windowSoftInputMode="adjustPan|stateAlwaysHidden" android:screenOrientation="portrait" >
+
+        <activity
+            android:name="com.e4deen.bean_player.view.entry_view.activity.EntryActivity"
+            android:windowSoftInputMode="adjustPan|stateAlwaysHidden"
+            android:screenOrientation="portrait" >
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+
+        <activity
+            android:name="com.e4deen.bean_player.view.player_view.activity.MainActivity"
+            android:windowSoftInputMode="adjustPan|stateAlwaysHidden"
+            android:parentActivityName="com.e4deen.bean_player.view.entry_view.activity.EntryActivity"
+            android:screenOrientation="portrait" >
+
+
         </activity>
 
         <activity
             android:name="com.e4deen.bean_player.view.file_explorer_view.activity.FileSearchActivity"
             android:parentActivityName="com.e4deen.bean_player.view.player_view.activity.MainActivity" >
         </activity>
+
         <service
             android:name="com.e4deen.bean_player.view.player_view.component.MediaPlayerService"
             android:label=".MediaPlayerService" />

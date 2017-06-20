@@ -35,7 +35,7 @@ public class Frag_plm_playlist_files extends Fragment {
 
 
     Context mContext;
-    String LOG_TAG = "Frag_plm_playlist_files";
+    String LOG_TAG = "BeanPlayer_Frag_plm_playlist_files";
     ListView lv_plm_playlist_files;
     Adapter_plm_playlist_files mAdapter_plm_playlist_files;
     //public Playlist_manager_db mPLM_DB;

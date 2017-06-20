@@ -70,7 +70,7 @@ import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
-    static String LOG_TAG = "Loopback_Player_Main";
+    static String LOG_TAG = "BeanPlayer_Player_Main";
     final int E_SUCCESS = 1;
     final int E_ERROR = 0;
 

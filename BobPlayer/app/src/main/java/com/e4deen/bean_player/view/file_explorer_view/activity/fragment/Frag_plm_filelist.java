@@ -41,7 +41,7 @@ import java.util.ArrayList;
 
 public class Frag_plm_filelist extends Fragment {
 
-    String LOG_TAG = "Bean_Player_Frag_plm_filelist";
+    String LOG_TAG = "BeanPlayer_Frag_plm_filelist";
     File file;
     ListView lv_ObjectList;
     Adapter_plm_filelist mAdapter_plm_filelist;

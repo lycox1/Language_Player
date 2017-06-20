@@ -29,6 +29,7 @@ android {
         main {
             res.srcDirs =
                     [
+                            'src/main/res/layout/view_entry/activity',
                             'src/main/res/layout/view_playlist_manager/activity/fragment/custom_dialog',
                             'src/main/res/layout/view_playlist_manager/activity/fragment/listview',
                             'src/main/res/layout/view_playlist_manager/activity/fragment',

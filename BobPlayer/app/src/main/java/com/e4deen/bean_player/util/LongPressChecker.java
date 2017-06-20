@@ -17,7 +17,7 @@ public class LongPressChecker {
         public void onLongPressed(View view, MotionEvent event);
     }
 
-    String LOG_TAG = "Jog_LongPressChecker";
+    String LOG_TAG = "BeanPlayer_LongPressChecker";
     private Handler mHandler = new Handler();
     private LongPressCheckRunnable mLongPressCheckRunnable = new LongPressCheckRunnable();
 

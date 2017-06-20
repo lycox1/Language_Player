@@ -25,7 +25,7 @@ import com.e4deen.bean_player.view.file_explorer_view.activity.FileSearchActivit
 
 public class Custom_dialog_plm extends Dialog {
 
-    String LOG_TAG="Bean_PLM_Custom_Dialog";
+    String LOG_TAG="BeanPlayer_PLM_Custom_Dialog";
     private TextView mContentView;
     private Button mOkButton;
     private Button mCancelButton;

@@ -20,7 +20,7 @@ import java.util.ArrayList;
  */
 public class Adapter_Main_PlayList extends BaseAdapter {
 
-    static String LOG_TAG = "Bean_Player_Main_FileList_Adapter";
+    static String LOG_TAG = "BeanPlayer_Main_FileList_Adapter";
     final int E_SUCCESS = 1;
     final int E_ERROR = 0;
     int mSelectedIndex = 0;

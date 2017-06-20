@@ -27,7 +27,7 @@ import com.e4deen.bean_player.view.player_view.component.MediaPlayerController;
 
 public class Frag_main_shadowing extends Fragment {
 
-    String LOG_TAG = "Frag_main_tab_shadowing";
+    String LOG_TAG = "BeanPlayer_Frag_main_tab_shadowing";
     Context mContext;
     ImageButton mBtnMyVoiceOnOff, mBtnPlayingFileOnOff;
     ImageView mIvMyVoice, mIvPlayingFile;

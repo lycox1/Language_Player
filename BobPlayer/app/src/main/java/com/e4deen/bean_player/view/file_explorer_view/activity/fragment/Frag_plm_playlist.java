@@ -31,7 +31,7 @@ import com.e4deen.bean_player.view.file_explorer_view.adapter.Adapter_plm_playli
 public class Frag_plm_playlist extends Fragment {
 
     Context mContext;
-    String LOG_TAG = "Bean_Player_Frag_plm_PlayList";
+    String LOG_TAG = "BeanPlayer_Frag_plm_PlayList";
     ListView lv_plm_playlist;
     Adapter_plm_playlist mAdapter_plm_playlist;
     //public Playlist_manager_db mPLM_DB;

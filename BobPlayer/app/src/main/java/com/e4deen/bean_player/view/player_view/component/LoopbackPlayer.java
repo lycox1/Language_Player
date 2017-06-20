@@ -18,7 +18,7 @@ import static java.lang.Math.tan;
  */
 
     public class LoopbackPlayer {
-        String LOG_TAG = "Bean_Player_MediaPlayerService_LoopbackPlayer";
+        String LOG_TAG = "BeanPlayer_MediaPlayerService_LoopbackPlayer";
         private int freq = 16000;
         private AudioRecord audioRecord = null;
         private Thread Rthread = null;

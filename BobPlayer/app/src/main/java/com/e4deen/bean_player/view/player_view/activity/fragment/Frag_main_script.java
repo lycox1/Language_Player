@@ -20,7 +20,7 @@ import com.e4deen.bean_player.view.player_view.component.MediaPlayerController;
 
 public class Frag_main_script extends Fragment {
 
-    String LOG_TAG = "Frag_main_filelist";
+    String LOG_TAG = "BeanPlayer_Frag_main_filelist";
     Context mContext;
     public Adapter_Main_PlayList mAdapterMainPlayList;
     ListView listview_playList;

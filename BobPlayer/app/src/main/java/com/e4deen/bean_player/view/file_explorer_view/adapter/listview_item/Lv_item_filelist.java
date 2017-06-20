@@ -14,7 +14,7 @@ import java.util.Locale;
 
 public class Lv_item_filelist {
 
-    static String LOG_TAG = "Jog_Player_FileList_Item";
+    static String LOG_TAG = "BeanPlayer_FileList_Item";
     final int E_SUCCESS = 1;
     final int E_ERROR = 0;
     final int FILE_EXPLORER_OBJ_TYPE_FILE = 0;

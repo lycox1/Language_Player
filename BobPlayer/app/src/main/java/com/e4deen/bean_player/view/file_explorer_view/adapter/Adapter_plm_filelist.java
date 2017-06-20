@@ -23,7 +23,7 @@ import java.util.ArrayList;
 
 public class Adapter_plm_filelist extends BaseAdapter {
 
-    static String LOG_TAG = "Bean_Player_PLM_FileList_Adapter";
+    static String LOG_TAG = "BeanPlayer_PLM_FileList_Adapter";
     final int E_SUCCESS = 1;
     final int E_ERROR = 0;
     boolean mSelectAllMode = false;

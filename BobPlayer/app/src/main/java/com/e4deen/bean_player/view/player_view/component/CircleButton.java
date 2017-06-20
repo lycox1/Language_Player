@@ -23,7 +23,7 @@ import org.w3c.dom.Text;
  */
 public class CircleButton extends RelativeLayout {
 
-    static String LOG_TAG = "Jog_Player_CircleTouchEvent";
+    static String LOG_TAG = "BeanPlayer_CircleTouchEvent";
     int normalBitmapId = R.drawable.ic_circle_release;
     int size = 0; // 휠 전체 사이즈 (가로 세로 대칭)
     double proportion_of_startButton = 0.381578; // 전체에서 start/pause 버튼의 비율. 정가운데를 0으로 놓은 비율
@@ -226,6 +226,7 @@ public class CircleButton extends RelativeLayout {
 */
                 case MotionEvent.ACTION_DOWN:
                     accum_mSec = 0;
+                    shiftTime = 0;
                     backStep = false;
                     tv_ShiftTime = new TextView(mContext);
                     RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
@@ -238,6 +239,7 @@ public class CircleButton extends RelativeLayout {
                     tv_ShiftTime.setPadding(0,0,0,0);
 
                     RL_Circle.addView(tv_ShiftTime, params);
+                    old_deg = degCalc(event.getX(), event.getY());
                     Vibe.Vibe_Start();
                     break;
 

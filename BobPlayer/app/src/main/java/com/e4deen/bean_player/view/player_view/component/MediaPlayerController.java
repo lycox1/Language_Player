@@ -31,7 +31,7 @@ import java.util.Date;
  */
 public class MediaPlayerController {
 
-    static String LOG_TAG = "Jog_Player_MediaPlayerController";
+    static String LOG_TAG = "BeanPlayer_MediaPlayerController";
     final int E_SUCCESS = 1;
     final int E_ERROR = 0;
 
