@@ -16,6 +16,7 @@ import com.e4deen.bean_player.R;
 import com.e4deen.bean_player.view.file_explorer_view.activity.FileSearchActivity;
 import com.e4deen.bean_player.view.player_view.activity.MainActivity;
 import com.e4deen.bean_player.view.player_view.component.MediaPlayerController;
+import com.tsengvn.typekit.TypekitContextWrapper;
 
 /**
  * Created by user on 2017-06-20.
@@ -37,10 +38,6 @@ public class EntryActivity extends AppCompatActivity {
 
         h= new Handler();
         h.postDelayed(mrun, 2000);
-
-
-
-
     }
 
     Runnable mrun = new Runnable(){
@@ -53,6 +50,11 @@ public class EntryActivity extends AppCompatActivity {
             //overridePendingTransition 이란 함수를 이용하여 fade in,out 효과를줌. 순서가 중요
         }
     };
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(TypekitContextWrapper.wrap(newBase));
+    }
 
     @Override
     public void onBackPressed(){

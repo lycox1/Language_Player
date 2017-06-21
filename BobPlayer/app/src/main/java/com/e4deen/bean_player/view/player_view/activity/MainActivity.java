@@ -55,6 +55,7 @@ import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 import com.e4deen.bean_player.data.FileParcelable;
 import com.e4deen.bean_player.view.player_view.data.BookMark;
+import com.tsengvn.typekit.TypekitContextWrapper;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -183,6 +184,12 @@ public class MainActivity extends AppCompatActivity {
 //---------------------------- Callback Setting End ----------------------------------//
 
         //DataBases.mPLM_DB.deleteAll();
+    }
+
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(TypekitContextWrapper.wrap(newBase));
     }
 
     /**

@@ -18,6 +18,7 @@ import com.e4deen.bean_player.util.Vibe;
 import com.e4deen.bean_player.view.file_explorer_view.activity.fragment.Frag_plm_filelist;
 import com.e4deen.bean_player.view.file_explorer_view.activity.fragment.Frag_plm_playlist;
 import com.e4deen.bean_player.view.file_explorer_view.activity.fragment.Frag_plm_playlist_files;
+import com.tsengvn.typekit.TypekitContextWrapper;
 
 /**
  * Created by user on 2016-12-18.
@@ -53,6 +54,11 @@ public class FileSearchActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Log.d(LOG_TAG, "FileSearchActivity onResume()");
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(TypekitContextWrapper.wrap(newBase));
     }
 
     @Override
