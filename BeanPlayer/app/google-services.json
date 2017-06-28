@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "358139460003",
+    "firebase_url": "https://beanplayer-6f6cf.firebaseio.com",
+    "project_id": "beanplayer-6f6cf",
+    "storage_bucket": "beanplayer-6f6cf.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:358139460003:android:89633edfe69db393",
+        "android_client_info": {
+          "package_name": "com.e4deen.bean_player"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "358139460003-j4f1gvgpklgp2fl1aat7lgukn6ur8ms5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAhDk1wU-sAnMJOcgsTQbBjlCYlyDnb9g4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
