@@ -56,6 +56,7 @@ public class Frag_main_filelist extends Fragment {
                 }
 
                 if(mFilelist.size() > mCurrentPlayingPosition + 1) {
+
                     mCurrentPlayingPosition++;
                     Valueable_Util.setCurrentPlayingPosition(mCurrentPlayingPosition);
                     MediaPlayerController.sController.stopPlay();
@@ -66,7 +67,12 @@ public class Frag_main_filelist extends Fragment {
 
                     listview_playList.setAdapter(mAdapterMainPlayList);
                     listview_playList.setSelection(mCurrentPlayingPosition);
+                    Log.d(LOG_TAG, "OnPlayingCompleteCb mFilelist.size() " + mFilelist.size() + ", mCurrentPlayingPosition " + mCurrentPlayingPosition);
+                } else if (mFilelist.size() == mCurrentPlayingPosition + 1) {
+                    Log.d(LOG_TAG, "OnPlayingCompleteCb last case mFilelist.size() " + mFilelist.size() + ", mCurrentPlayingPosition " + mCurrentPlayingPosition);
+                    MediaPlayerController.sController.stopPlay();
                 }
+
             }
         };
 

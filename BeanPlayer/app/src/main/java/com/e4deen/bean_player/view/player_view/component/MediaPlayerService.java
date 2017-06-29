@@ -82,6 +82,14 @@ public class MediaPlayerService extends Service {
         }
     }
 
+    @Override
+    public boolean onUnbind(Intent intent) {
+        Log.d(LOG_TAG, "MediaPlayerService onUnbind()");
+        stopPlay();
+        mediaPlayer.release();
+        return super.onUnbind(intent);
+    }
+
     // Service handler - receive msg from Activity(MediaPlayerController)
     private class RemoteHandler extends Handler {
 
@@ -405,12 +413,18 @@ public class MediaPlayerService extends Service {
         mediaPlayer.start();
         mediaPlayer.setVolume(mLeftVol, mRightVol);
         params.setSpeed(mPlaybackSpeed);
+
+        if(Constants.sSeekToProgress != 0) {
+            mediaPlayer.seekTo(Constants.sSeekToProgress);
+            Constants.sSeekToProgress = 0;
+        }
         return E_SUCCESS;
     }
 
     public int pausePlay() {
         Log.d(LOG_TAG, "pausePlay");
         mediaPlayer.pause();
+        Constants.PLAYER_STATUS = Constants.PLAYER_STATUS_PAUSE;
         return E_SUCCESS;
     }
 
@@ -420,6 +434,8 @@ public class MediaPlayerService extends Service {
             Log.d(LOG_TAG, "stopPlay() - isPlaying() is true");
             mediaPlayer.stop();
         }
+        Constants.FILE_READY_STATUS = Constants.FILE_NOT_READY;
+        Constants.PLAYER_STATUS = Constants.PLAYER_STATUS_STOP;
         return E_SUCCESS;
     }
 

@@ -38,8 +38,6 @@
             android:parentActivityName="com.e4deen.bean_player.view.entry_view.activity.EntryActivity"
             android:screenOrientation="portrait"
             android:launchMode="singleTask">
-
-
         </activity>
 
         <activity

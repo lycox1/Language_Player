@@ -1,5 +1,6 @@
 package com.e4deen.bean_player.view.player_view.component;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -36,6 +37,7 @@ public class MediaPlayerController {
     final int E_ERROR = 0;
 
     public static MediaPlayerController sController;
+    public ImageButton btn_file_search, btn_play_pause;
 
     String playFile = null;
     SeekBar mSeekBar;
@@ -254,7 +256,7 @@ public class MediaPlayerController {
         Constants.FILE_READY_STATUS = Constants.FILE_READY;
         Log.d(LOG_TAG, "setPlayFile fullPath = " + playFile);
         Valueable_Util.setCurrentPlayingFilePath(fullPath);
-        //onOnDrawBookmark();
+        Constants.sSeekToProgress = 0;
         sendMessage(COMMAND_SET_FILE, playFile);
         sendMessage(COMMAND_GET_DURATION);
 
@@ -278,7 +280,6 @@ public class MediaPlayerController {
     public int pausePlay() {
         Constants.PLAYER_STATUS = Constants.PLAYER_STATUS_PAUSE;
         //(ImageButton)((AppCompatActivity)mContext).findViewById(R.id.btn_play_pause_id).callOnClick();
-
         sendMessage(COMMAND_PAUSE);
         return E_SUCCESS;
     }

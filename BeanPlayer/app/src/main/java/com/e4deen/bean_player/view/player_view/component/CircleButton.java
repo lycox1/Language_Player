@@ -32,12 +32,12 @@ public class CircleButton extends RelativeLayout {
     int old_deg, new_deg, unit_mSec, shiftTime = 0;
     int backStepDeg = 0;
     int backStepLevel = 30;
+    float prev_shift_time, this_shift_time;
     double radToDegree = 180 / Math.PI;
     Context mContext;
     int mLayoutWidth, mLayoutHeight, mRotatorWidth, mRotatorHeight;
     private ImageView ivRotor;
     private Bitmap bmpRotorOn;
-    int test = 0;
     int accum_Deg, accum_mSec;
     boolean backStep = false;
     public TextView tv_ShiftTime;
@@ -229,6 +229,8 @@ public class CircleButton extends RelativeLayout {
                 case MotionEvent.ACTION_DOWN:
                     accum_mSec = 0;
                     shiftTime = 0;
+                    prev_shift_time = 0;
+                    this_shift_time = 0;
                     backStep = false;
                     tv_ShiftTime = new TextView(mContext);
                     RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
@@ -242,12 +244,13 @@ public class CircleButton extends RelativeLayout {
 
                     RL_Circle.addView(tv_ShiftTime, params);
                     old_deg = degCalc(event.getX(), event.getY());
-                    Vibe.Vibe_Start();
+                    //Vibe.Vibe_Start();
                     break;
 
                 case MotionEvent.ACTION_MOVE:
                     //if( jog_drag_state == Constants.JOG_DRAG_START) {
                     if(true) { // just for debug
+
 
                         //new_deg = degCalc(x, y);
                         new_deg = degCalc(event.getX(), event.getY());
@@ -257,6 +260,15 @@ public class CircleButton extends RelativeLayout {
 
                         accum_Deg += (new_deg - old_deg);
                         accum_mSec += shiftTime;
+
+                        this_shift_time =  (accum_mSec / 300);
+                        Log.d(LOG_TAG, "accum_mSec " + accum_mSec + "circle this_shift_time " + this_shift_time + ", prev_shift_time " + prev_shift_time);
+                        if(this_shift_time != prev_shift_time) {
+                            Log.d(LOG_TAG, "run vibe");
+                            prev_shift_time = this_shift_time;
+                            Vibe.vibration(300);
+                        }
+
                         //String round_shift_time = accum_mSec/1000.0;
                         //String.format("%.1f", (float)accum_mSec/1000.0f);
                         String text_shift_time;
@@ -291,7 +303,7 @@ public class CircleButton extends RelativeLayout {
 
                 case MotionEvent.ACTION_UP:
                     tv_ShiftTime.setText("");
-                    Vibe.Vibe_Stop();
+                    //Vibe.Vibe_Stop();
                     backStep = true;
 
                     if(shiftTime > 0) {

@@ -9,6 +9,10 @@ public class Constants {
     public static boolean FAIL = false;
     public static boolean SUCCESS = true;
 
+    public static int sPID = 0;
+    public static boolean sBootFlag = false;
+    public static int sSeekToProgress = 0;
+
     public static Context sPlayerContext;
     public static Context sFileListManagerContext;
     public static final int PLAYER_STATUS_PAUSE = 0;

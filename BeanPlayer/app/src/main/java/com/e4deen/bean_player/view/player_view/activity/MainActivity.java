@@ -24,6 +24,8 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -36,10 +38,12 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import com.e4deen.bean_player.db.DataBases;
 import com.e4deen.bean_player.db.Playlist_manager_db;
+import com.e4deen.bean_player.util.CustomDialog;
 import com.e4deen.bean_player.util.Valueable_Util;
 import com.e4deen.bean_player.view.player_view.activity.fragment.Frag_main_filelist;
 import com.e4deen.bean_player.view.player_view.activity.fragment.Frag_main_script;
@@ -93,14 +97,17 @@ public class MainActivity extends AppCompatActivity {
     boolean isLongPress  = false;
     boolean mBookmarkInit = false;
     boolean mPeriodRepeatMode = false;
+    boolean mExitCheck = false;
     int mPeriodRepeatFrom, mPeriodRepeatTo;
     Handler mHandler;
     Runnable mRunableForPrevBookmark, mRunableForNextBookmark;
     public ImageButton btn_one_repeat;
+    private CustomDialog mCustomDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
         Log.d(LOG_TAG, "MainActivity onCreate()" );
         Log.d(LOG_TAG, "onCreate pid " + android.os.Process.myPid());
@@ -161,6 +168,28 @@ public class MainActivity extends AppCompatActivity {
         DataBases.mPLM_DB.open();
 
         Valueable_Util.init_Valueable_Util(this);
+
+        mExitCheck = false;
+
+        TelephonyManager mTelMgr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        mTelMgr.listen(new PhoneStateListener() {
+            public void onCallStateChanged(int state, String incomingNumber) {
+                switch (state) {
+                    case TelephonyManager.CALL_STATE_IDLE:
+                        if( (Constants.PLAYER_STATUS == Constants.PLAYER_STATUS_PAUSE) && (Constants.FILE_READY_STATUS == Constants.FILE_READY) ) {
+                            MediaPlayerController.sController.startPlay();
+                        }
+                        break;
+                    case TelephonyManager.CALL_STATE_OFFHOOK:
+                    case TelephonyManager.CALL_STATE_RINGING:
+                        if( (Constants.PLAYER_STATUS == Constants.PLAYER_STATUS_PLAY) && (Constants.FILE_READY_STATUS == Constants.FILE_READY) ) {
+                            MediaPlayerController.sController.pausePlay();
+                        }
+                        break;
+                }
+            }
+        }, PhoneStateListener.LISTEN_CALL_STATE);
+
 //----------------------------- ETC End               ----------------------------------//
 //---------------------------- Fragment Setting Start ----------------------------------//
         FragmentManager fm = getFragmentManager();
@@ -270,6 +299,38 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onBackPressed(){
+        Log.d(LOG_TAG, "onBackPress");
+
+        if(mExitCheck == false) {
+            mCustomDialog = new CustomDialog(this,
+                    "Do you want to exit?", // 제목
+                    "", // 내용
+                    leftListener, // 왼쪽 버튼 이벤트
+                    rightListener); // 오른쪽 버튼 이벤트
+            mCustomDialog.show();
+        } else {
+            super.onBackPressed();
+        }
+
+    }
+
+    private View.OnClickListener leftListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            //Toast.makeText(getApplicationContext(), "왼쪽버튼 클릭", Toast.LENGTH_SHORT).show();
+            mCustomDialog.dismiss();
+        }
+    };
+
+    private View.OnClickListener rightListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            //Toast.makeText(getApplicationContext(), "오른쪽버튼 클릭", Toast.LENGTH_SHORT).show();
+            mExitCheck = true;
+            onBackPressed();
+        }
+    };
+
     /**
      * Called when leaving the activity
      */
@@ -287,10 +348,13 @@ public class MainActivity extends AppCompatActivity {
      */
     @Override
     public void onDestroy() {
+
         if (mAdView != null) {
             mAdView.destroy();
         }
         MediaPlayerController.sController.PlayerDestroy();
+        Constants.sPID = 0;
+
         super.onDestroy();
         Log.d(LOG_TAG, "MainActivity onDestroy()" );
     }
@@ -421,11 +485,9 @@ public class MainActivity extends AppCompatActivity {
                                 if (Constants.PLAYER_STATUS == Constants.PLAYER_STATUS_PLAY) {
                                     Log.d(LOG_TAG, "btn_play_pause_id call pausePlay()");
                                     MediaPlayerController.sController.pausePlay();
-                                    Constants.PLAYER_STATUS = Constants.PLAYER_STATUS_PAUSE;
                                 } else {
                                     Log.d(LOG_TAG, "btn_play_pause_id call startPlay()");
                                     MediaPlayerController.sController.startPlay();
-                                    Constants.PLAYER_STATUS = Constants.PLAYER_STATUS_PLAY;
                                 }
                             }
                             break;
@@ -1193,6 +1255,7 @@ public class MainActivity extends AppCompatActivity {
                     DateFormat formatter = new SimpleDateFormat("mm:ss");
                     String dateFormatted = formatter.format(date);
                     tv_elapsed_time.setText(dateFormatted);
+                    Constants.sSeekToProgress = progress;
                 }
             } else {
                 if(mPeriodRepeatMode == true) {
@@ -1201,7 +1264,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
 
-                //Log.d(LOG_TAG, "onProgressChanged not fromUser progress " + progress );
             }
         }
     };
